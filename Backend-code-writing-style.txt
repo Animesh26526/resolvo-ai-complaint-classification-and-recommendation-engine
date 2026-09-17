@@ -1,0 +1,587 @@
+You are helping me build the Node.js + Express.js + MongoDB backend for our
+AI-Powered Complaint Classification & Resolution Recommendation Engine.
+
+I will provide the project's PRD/design documents separately. Use those
+documents as the source of truth for the system's requirements and workflow.
+
+I will also provide this coding-style reference separately. All generated
+Node.js/Express/Mongoose backend code should follow this coding style.
+
+The goal is to keep the backend simple, readable, modular, secure and fast
+to develop without unnecessary abstraction.
+
+==================================================
+GENERAL STYLE
+==================================================
+
+- Keep the code simple, direct, readable and modular.
+- Prefer straightforward procedural logic over clever abstractions.
+- Do not over-engineer the architecture.
+- Do not introduce unnecessary design patterns, repositories, factories,
+  DTO layers, dependency injection frameworks or additional abstraction
+  layers unless explicitly required.
+- Optimize for fast development, readability and maintainability.
+- Follow the existing project structure and conventions when modifying code.
+- Prefer explicit logic over hidden behavior.
+- Keep related logic together.
+
+==================================================
+PROJECT STRUCTURE
+==================================================
+
+Use the backend structure:
+
+backend/
+├── src/
+│   ├── controllers/
+│   ├── db/
+│   ├── middlewares/
+│   ├── models/
+│   ├── routes/
+│   ├── services/
+│   └── app.js
+├── server.js
+├── package.json
+└── ...
+
+Use feature-based filenames such as:
+
+<feature>.controller.js
+<feature>.routes.js
+<feature>.model.js
+<feature>.middleware.js
+<feature>.service.js
+
+Examples for this project:
+
+auth.controller.js
+auth.routes.js
+
+complaint.controller.js
+complaint.routes.js
+complaint.model.js
+
+ai.service.js
+
+sla.service.js
+
+report.controller.js
+report.routes.js
+
+dashboard.controller.js
+dashboard.routes.js
+
+Create files only when they are actually required.
+
+==================================================
+NAMING
+==================================================
+
+- Use descriptive camelCase names.
+- Functions should generally use verb-object naming.
+
+Examples:
+
+createUser()
+getUserById()
+updateUser()
+deleteUser()
+
+createComplaint()
+getComplaintById()
+updateComplaintStatus()
+assignComplaint()
+registerComplaint()
+
+classifyComplaint()
+generateRecommendation()
+analyzeComplaint()
+
+generateReport()
+exportReport()
+
+checkSlaStatus()
+
+- Boolean variables should use is/has/can prefixes.
+
+Examples:
+
+isUserAlreadyExists
+isPasswordValid
+isComplaintResolved
+isSlaExceeded
+hasPermission
+canUpdateComplaint
+
+- Use descriptive variable names.
+- Avoid unnecessarily short variable names such as x, y, d, obj, data1,
+  temp, etc. unless their meaning is completely obvious.
+- Mongoose model variables should use the model name followed by Model.
+
+Examples:
+
+userModel
+complaintModel
+resolutionModel
+reportModel
+
+==================================================
+CONTROLLER STYLE
+==================================================
+
+Controllers should generally follow this sequence:
+
+1. Extract input from:
+   req.body
+   req.params
+   req.query
+   req.user
+   req.file
+
+2. Perform validation and authorization checks.
+
+3. Return early for errors.
+
+4. Perform database or service operations.
+
+5. Store important results in explicit intermediate variables.
+
+6. Return a clear HTTP response.
+
+Example:
+
+async function createComplaint(req, res) {
+
+    const {
+        description,
+        category,
+        channel,
+    } = req.body;
+
+    if (!description) {
+        return res.status(400).json({
+            message: "Complaint description is required"
+        })
+    }
+
+    const complaint = await complaintModel.create({
+        description,
+        category,
+        channel,
+        createdBy: req.user.id,
+    })
+
+    res.status(201).json({
+        message: "Complaint created successfully",
+        complaint: {
+            id: complaint._id,
+            description: complaint.description,
+            category: complaint.category,
+            priority: complaint.priority,
+            status: complaint.status,
+        }
+    })
+}
+
+Keep controllers readable from top to bottom.
+
+Avoid deeply nested conditions.
+
+Prefer:
+
+if (!condition) {
+    return res.status(...)
+}
+
+instead of large nested if/else blocks.
+
+==================================================
+ERROR HANDLING
+==================================================
+
+- Prefer early returns.
+- Avoid unnecessary else nesting.
+- Use clear HTTP status codes.
+- Use short and understandable response messages.
+- Do not expose unnecessary internal error details.
+- Do not expose database errors, stack traces, secrets, tokens or internal
+  implementation details to clients.
+- Handle expected errors explicitly.
+- Preserve security and correctness even if the reference style is simpler.
+
+Typical status codes:
+
+400 → Invalid request / validation error
+401 → Authentication required / invalid authentication
+403 → Authenticated but not authorized
+404 → Resource not found
+409 → Conflict
+500 → Unexpected server error
+
+Example:
+
+return res.status(404).json({
+    message: "Complaint not found"
+})
+
+==================================================
+RESPONSE STYLE
+==================================================
+
+Prefer consistent JSON responses.
+
+Example:
+
+res.status(200).json({
+    message: "Complaints fetched successfully",
+    complaints: complaints,
+})
+
+For a single resource:
+
+res.status(200).json({
+    message: "Complaint fetched successfully",
+    complaint: complaint,
+})
+
+For creation:
+
+res.status(201).json({
+    message: "Complaint created successfully",
+    complaint: complaint,
+})
+
+Use explicit status codes.
+
+Do not rely on framework defaults.
+
+==================================================
+ROUTES
+==================================================
+
+Routes should remain thin.
+
+Routes should primarily connect:
+
+HTTP method
+→ path
+→ middleware
+→ controller
+
+Example:
+
+router.post(
+    "/",
+    authMiddleware,
+    createComplaint
+)
+
+Do not place business logic inside route files.
+
+Do not perform database queries directly inside routes.
+
+==================================================
+MIDDLEWARE
+==================================================
+
+Each middleware should have one clear responsibility.
+
+Authentication middleware should generally follow:
+
+extract token
+→ validate token
+→ identify user
+→ authorize if required
+→ attach user to req
+→ next()
+
+Example conceptual usage:
+
+router.get(
+    "/",
+    authMiddleware,
+    getComplaints
+)
+
+Role-based authorization should remain simple and explicit.
+
+Examples of roles in this project include:
+
+customer
+cse
+qat
+om
+
+Do not duplicate authorization logic throughout controllers when a
+small reusable middleware is appropriate.
+
+==================================================
+MODELS
+==================================================
+
+Use explicit Mongoose schema definitions.
+
+Example:
+
+const complaintSchema = new mongoose.Schema({
+
+    description: {
+        type: String,
+        required: true,
+        trim: true,
+    },
+
+    category: {
+        type: String,
+        enum: [
+            "Product",
+            "Packaging",
+            "Trade",
+        ],
+    },
+
+    priority: {
+        type: String,
+        enum: [
+            "High",
+            "Medium",
+            "Low",
+        ],
+    },
+
+    status: {
+        type: String,
+        required: true,
+    },
+
+})
+
+const complaintModel = mongoose.model(
+    "complaint",
+    complaintSchema
+)
+
+module.exports = complaintModel;
+
+Follow the finalized PRD/design documents for the actual fields,
+relationships, enums and business requirements.
+
+Do not invent fields when the required design already defines them.
+
+==================================================
+DATABASE QUERIES
+==================================================
+
+Keep MongoDB/Mongoose queries readable.
+
+For chained queries, format them vertically:
+
+const complaints = await complaintModel
+    .find({ createdBy: req.user.id })
+    .populate("createdBy", "name email")
+    .sort({ createdAt: -1 })
+
+Do not unnecessarily compress complex queries into one line.
+
+Use appropriate indexes, validation and query filters when required
+for correctness and performance.
+
+Avoid fetching unnecessary data when a focused query is sufficient.
+
+==================================================
+SERVICES
+==================================================
+
+Services should contain logic that is better kept outside controllers,
+especially integrations with external systems.
+
+For this project, examples include:
+
+AI/ML service communication
+SLA calculations
+report generation
+other external API communication
+
+Example:
+
+const analysis = await aiService.analyzeComplaint(
+    complaint.description
+)
+
+Controllers should call services rather than containing the complete
+implementation of external-service communication.
+
+Do not create service layers for simple CRUD operations unless they
+actually improve clarity or are required by the existing structure.
+
+==================================================
+FASTAPI AI SERVICE
+==================================================
+
+The AI/ML functionality is implemented as a separate Python FastAPI
+service.
+
+The Node.js backend communicates with the FastAPI service through HTTP/REST.
+
+Node.js should not contain Python/ML implementation.
+
+Keep communication with the FastAPI service inside an appropriate
+backend service such as:
+
+ai.service.js
+
+The controller should call the service rather than directly implementing
+HTTP communication to the AI service.
+
+Example structure:
+
+Controller
+    ↓
+ai.service.js
+    ↓
+FastAPI AI Service
+
+==================================================
+AUTHENTICATION & SECURITY
+==================================================
+
+Use JWT-based authentication and bcrypt password hashing as defined
+by the project architecture.
+
+Never:
+
+- store plaintext passwords
+- return passwords in API responses
+- expose JWT secrets
+- expose database credentials
+- expose internal stack traces
+- trust client-provided user identity
+- allow users to bypass role-based authorization
+
+Use environment variables for secrets and configuration.
+
+==================================================
+COMPLAINT DOMAIN
+==================================================
+
+Use the terminology and workflow defined in the finalized project
+documents.
+
+Important project entities include:
+
+User
+Customer
+Customer Support Executive
+Quality Assurance Team
+Operations Manager
+Complaint
+AI Engine
+Resolution
+Dashboard
+Report
+
+Do not rename these concepts unnecessarily.
+
+The backend implementation should remain aligned with the finalized
+UML diagrams, activity diagram, sequence diagrams, component diagram,
+deployment architecture and PRD.
+
+==================================================
+AI / COMPLAINT ANALYSIS
+==================================================
+
+AI-related operations should remain separated from ordinary complaint
+CRUD logic.
+
+Examples include:
+
+classifyComplaint()
+analyzeSentiment()
+assignPriority()
+generateRecommendation()
+
+The Node backend should coordinate with the FastAPI AI service rather
+than implementing the ML logic itself.
+
+Follow the finalized project workflow when determining when AI analysis
+occurs and how its result affects the complaint lifecycle.
+
+Do not invent a different workflow.
+
+==================================================
+FORMATTING
+==================================================
+
+- Use generous blank lines between logical blocks.
+- Keep related statements together.
+- Do not compress functions unnecessarily.
+- Use consistent indentation.
+- Keep object properties readable.
+- Keep function bodies visually clear.
+- Don't add excessive comments.
+- Don't comment obvious code.
+- Add comments only for genuinely non-obvious logic.
+
+Example:
+
+const complaint = await complaintModel
+    .findById(complaintId)
+    .populate("createdBy", "name email")
+
+This is preferred over unnecessarily compressed code.
+
+==================================================
+MODIFICATION RULE
+==================================================
+
+When I provide an existing file:
+
+1. Understand the existing file first.
+2. Identify the required change.
+3. Preserve working logic that does not need modification.
+4. Follow the existing naming and structural conventions.
+5. Modify the file in the same coding style.
+6. Do not rewrite the entire project unnecessarily.
+7. Do not introduce unrelated improvements unless requested.
+
+When implementing a new feature:
+
+1. Inspect the existing project structure.
+2. Identify which existing files can be reused.
+3. Create only the files actually required.
+4. Keep routes thin.
+5. Keep controllers readable.
+6. Keep models explicit.
+7. Isolate external integrations inside services.
+8. Keep the implementation consistent with the PRD and finalized designs.
+
+==================================================
+IMPORTANT
+==================================================
+
+The purpose of this reference is to reproduce the project's coding STYLE
+and STRUCTURE.
+
+It is NOT a requirement to blindly reproduce bugs, insecure practices,
+or unnecessary limitations.
+
+If this coding style conflicts with:
+
+- security
+- correctness
+- MongoDB/Mongoose requirements
+- Express.js conventions
+- JWT/bcrypt security
+- FastAPI integration requirements
+- an explicit project requirement
+
+then preserve correctness and security while keeping the overall coding
+style as close as possible.
+
+Do not over-engineer the implementation.
+
+Do not introduce unnecessary abstractions simply to make the code
+"enterprise-looking".
+
+Prefer code that another student/developer can immediately read,
+understand, debug and modify.
