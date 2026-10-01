@@ -29,6 +29,8 @@ class AnalyzeComplaintResponse(BaseModel):
     priority: Literal["High", "Medium", "Low"]
     recommendation: str
     is_resolvable_by_ai: bool
+    reply: Optional[str] = None
+    html_guide: Optional[str] = None
 
 
 class SentimentResult(BaseModel):

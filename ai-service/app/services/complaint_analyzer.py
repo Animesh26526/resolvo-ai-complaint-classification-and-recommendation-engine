@@ -74,10 +74,25 @@ class ComplaintAnalyzerService:
             is_resolvable = False
 
         # Return strictly matching contract
+        # Generate HTML Guide and Reply using GptOssService
+        guide_prompt = f"The user has an issue: {clean_text}. The category is {category_res.category} and priority is {priority_res.priority}. Write a full standalone HTML document with inline CSS for a beautiful troubleshooting guide. Start directly with <!DOCTYPE html>. No markdown fences."
+        html_res = await self.gpt_oss_service._call_llm_chat(guide_prompt)
+        html_guide = html_res.reply if html_res else "<html><body><h3>Resolution Guide Unavailable</h3></body></html>"
+
+        # Strip markdown fences if present
+        if html_guide.startswith("```html"): html_guide = html_guide[7:]
+        if html_guide.endswith("```"): html_guide = html_guide[:-3]
+
+        reply_prompt = f"The user said: {clean_text}. Provide a polite 2-sentence spoken response acknowledging their issue in the exact same language they used."
+        reply_res = await self.gpt_oss_service._call_llm_chat(reply_prompt)
+        spoken_reply = reply_res.reply if reply_res else "I understand your issue and have registered your complaint."
+
         return {
             "category": category_res.category,
             "sentiment": sentiment_res.sentiment,
             "priority": priority_res.priority,
             "recommendation": recommendation,
             "is_resolvable_by_ai": is_resolvable,
+            "reply": spoken_reply,
+            "html_guide": html_guide.strip(),
         }

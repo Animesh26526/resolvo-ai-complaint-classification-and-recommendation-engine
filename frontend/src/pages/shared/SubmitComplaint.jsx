@@ -1,121 +1,450 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { MessageSquare, Mail, Users, Send, AlertTriangle, Bot, CheckCircle, Activity, Save, Mic, MicOff, Sparkles } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
+import AgenticMode from '../../components/complaints/AgenticMode';
+import LiveD2DSession from '../../components/complaints/LiveD2DSession';
 
-// Handles form submission for new complaints (used by Customer and CSE).
 export default function SubmitComplaint() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  
-  const [description, setDescription] = useState('');
-  const [channel, setChannel] = useState('Web');
-  const [customerEmail, setCustomerEmail] = useState(''); // Used by CSE
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState('');
+  const [view, setView] = useState('selection'); // selection, text_init, text_chat, email, live, agentic
+  const [sessionComplaint, setSessionComplaint] = useState(null);
 
-  const handleSubmit = async (e) => {
+  // Text Flow State
+  const [directDesc, setDirectDesc] = useState('');
+  const [chatMessages, setChatMessages] = useState([]);
+  const [isTyping, setIsTyping] = useState(false);
+  const [chatInput, setChatInput] = useState('');
+  const endOfChatRef = useRef(null);
+
+  useEffect(() => {
+    endOfChatRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [chatMessages]);
+
+  const handleStartTextChat = async (e) => {
     e.preventDefault();
-    setIsSubmitting(true);
-    setError('');
+    if (!directDesc.trim()) return;
+    setIsTyping(true);
+    
+    try {
+      const response = await api.post(user?.role === 'cse' ? '/complaints/staff' : '/complaints', {
+        description: directDesc,
+        channel: 'Direct'
+      });
+      const c = response.data.complaint;
+      setSessionComplaint(c);
+
+      setChatMessages([
+        { role: 'user', content: directDesc },
+        { 
+          role: 'assistant', 
+          content: 'I have logged your complaint (ID: ' + c._id + '). How else can I help you?',
+          isEscalated: false,
+          isResolved: false
+        }
+      ]);
+      setView('text_chat');
+    } catch (err) {
+      alert('Failed to log complaint');
+    } finally {
+      setIsTyping(false);
+    }
+  };
+
+  const handleSendChat = async () => {
+    if (!chatInput.trim()) return;
+    const userMsg = { role: 'user', content: chatInput.trim() };
+    const history = [...chatMessages, userMsg];
+    setChatMessages(history);
+    setChatInput('');
+    setIsTyping(true);
 
     try {
-      if (user.role === 'cse') {
-        // CSE submitting on behalf of a customer
-        await api.post('/complaints/staff', {
-          description,
-          sourceChannel: channel,
-          customerEmail
+      // Simulate follow up chat since current backend only analyzes the main complaint
+      // Call ai-service chat
+      const res = await fetch('http://127.0.0.1:8000/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: chatInput.trim(), session_id: sessionComplaint._id })
+      });
+      const chatRes = await res.json();
+      setChatMessages(prev => [...prev, { 
+        role: 'assistant', content: chatRes.response || 'Noted.', isEscalated: false, isResolved: false
+      }]);
+    } catch(e) {
+      setChatMessages(prev => [...prev, { role: 'assistant', content: 'System error' }]);
+    }
+    setIsTyping(false);
+  };
+
+  // Email State
+  const [emailSubject, setEmailSubject] = useState('');
+  const [emailBody, setEmailBody] = useState('');
+  const [emailDraft, setEmailDraft] = useState('');
+  const [isDrafting, setIsDrafting] = useState(false);
+
+  const handleEmailDraft = async () => {
+    if (!emailBody.trim()) return;
+    setIsDrafting(true);
+    try {
+      // Create a mock draft since backend doesn't have draft email endpoint
+      
+  (async () => {
+    try {
+      const res = await fetch('http://127.0.0.1:8000/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: "Draft a professional customer support email response regarding this issue: " + emailBody, session_id: "email_draft" })
         });
-        navigate('/cse/dashboard');
-      } else {
-        // Customer submitting their own
-        await api.post('/complaints', {
-          description,
-          sourceChannel: 'Web'
-        });
-        navigate('/customer/complaints');
-      }
-    } catch (err) {
-      setError(err.response?.data?.message || 'Failed to submit complaint.');
-    } finally {
-      setIsSubmitting(false);
+        const chatRes = await res.json();
+        setEmailDraft(chatRes.response);
+        setIsDrafting(false);
+    } catch(err) {
+      setEmailDraft('Failed to draft email.');
+      setIsDrafting(false);
+    }
+  })();
+  
+    } catch (e) {
+      setEmailDraft('Failed to connect to AI server.');
+      setIsDrafting(false);
+    }
+  };
+
+  const handleEmailSubmit = async () => {
+    if (!emailBody.trim()) return;
+    try {
+      const response = await api.post(user?.role === 'cse' ? '/complaints/staff' : '/complaints', {
+        description: `Subject: ${emailSubject}\nBody: ${emailBody}\nDraft: ${emailDraft}`,
+        channel: 'Email'
+      });
+      alert(`Complaint logged successfully: ${response.data.complaint._id}`);
+      navigate('/customer/complaints');
+    } catch (e) {
+      alert('Failed to log email complaint.');
+    }
+  };
+
+  // Audio / Live State mock
+  const [isRecording, setIsRecording] = useState(false);
+  const [liveTranscript, setLiveTranscript] = useState('');
+
+  const mediaRecorderRef = useRef(null);
+  const audioChunksRef = useRef([]);
+
+  const handleLiveRecord = async () => {
+    if (isRecording) {
+      mediaRecorderRef.current?.stop();
+      setIsRecording(false);
+      return;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) audioChunksRef.current.push(e.data);
+      };
+
+      mediaRecorder.onstop = async () => {
+        stream.getTracks().forEach(t => t.stop());
+        const blob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        const formData = new FormData();
+        formData.append('file', blob, 'recording.webm');
+        
+        try {
+          const res = await fetch('http://127.0.0.1:8000/api/transcribe', {
+            method: 'POST',
+            body: formData
+          });
+          const data = await res.json();
+          setLiveTranscript(data.transcript);
+        } catch(err) {
+          alert("Transcription failed");
+        }
+      };
+
+      mediaRecorder.start();
+      setIsRecording(true);
+    } catch(err) {
+      alert("Microphone access denied");
+    }
+  };
+
+  const handleLiveRegister = async () => {
+    try {
+      const response = await api.post(user?.role === 'cse' ? '/complaints/staff' : '/complaints', {
+        description: `TRANSCRIPT: ${liveTranscript}`,
+        channel: 'Direct'
+      });
+      alert(`Complaint Registered! ID: ${response.data.complaint._id}`);
+      navigate('/customer/complaints');
+    } catch (e) {
+      alert('Registration failed.');
+    }
+  };
+
+  // Agentic Mode mock
+  const [agenticResult, setAgenticResult] = useState(null);
+  
+  const handleAgenticProcess = async () => {
+    if (isRecording) {
+      mediaRecorderRef.current?.stop();
+      setIsRecording(false);
+      return;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) audioChunksRef.current.push(e.data);
+      };
+
+      mediaRecorder.onstop = async () => {
+        stream.getTracks().forEach(t => t.stop());
+        const blob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        const formData = new FormData();
+        formData.append('file', blob, 'recording.webm');
+        formData.append('channel', 'direct');
+        
+        try {
+          const res = await fetch('http://127.0.0.1:8000/api/audio-complaint', {
+            method: 'POST',
+            body: formData
+          });
+          const data = await res.json();
+          // Now save this to Node backend
+          const response = await api.post(user?.role === 'cse' ? '/complaints/staff' : '/complaints', {
+            description: data.transcript,
+            channel: 'direct'
+          });
+          const c = response.data.complaint;
+          // Trigger analysis on Node backend to sync
+          const analysisRes = await api.post(`/complaints/${c._id}/analyze`);
+
+          setAgenticResult({
+            complaint: c,
+            analysis: analysisRes.data.analysis,
+            transcript: data.transcript
+          });
+        } catch(err) {
+          console.error(err);
+          alert("Agentic processing failed");
+        }
+      };
+
+      mediaRecorder.start();
+      setIsRecording(true);
+    } catch(err) {
+      alert("Microphone access denied");
     }
   };
 
   return (
-    <div className="flex flex-col w-full p-6 lg:p-8 gap-6 max-w-3xl mx-auto">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-          {user.role === 'cse' ? 'Register Direct Complaint' : 'Submit a Complaint'}
-        </h1>
-        <p className="text-sm text-slate-500">
-          {user.role === 'cse' ? 'Intake a complaint from a direct channel (Email/Call).' : 'Please describe your issue in detail so we can resolve it quickly.'}
-        </p>
+    <div className="flex flex-col w-full p-6 lg:p-8 gap-6 max-w-4xl mx-auto">
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Receive Complaint</h1>
+          <p className="text-sm text-slate-500">Select the channel to interact and document the customer issue.</p>
+        </div>
+        {(view !== 'selection') && (
+          <button className="px-4 py-2 border border-slate-200 rounded-lg text-sm font-medium hover:bg-slate-50" onClick={() => { setView('selection'); setSessionComplaint(null); setAgenticResult(null); }}>
+            &larr; Back to Channels
+          </button>
+        )}
       </div>
 
-      <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
-        <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-          
-          {error && (
-            <div className="p-4 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-sm">
-              {error}
+      <AnimatePresence mode="wait">
+        {view === 'selection' && (
+          <motion.div key="selection" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm cursor-pointer hover:-translate-y-1 hover:shadow-md transition-all text-center" onClick={() => setView('text_init')}>
+              <div className="w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center bg-blue-50 text-blue-600"><MessageSquare size={32} /></div>
+              <h3 className="font-bold text-lg mb-2">Text / Direct</h3>
+              <p className="text-sm text-slate-500">Standard text-based entry system and interactive chatbot.</p>
             </div>
-          )}
-
-          {user.role === 'cse' && (
-            <div className="flex flex-col gap-2">
-              <label className="text-sm font-medium text-slate-700">Customer Email</label>
-              <input
-                type="email"
-                required
-                value={customerEmail}
-                onChange={(e) => setCustomerEmail(e.target.value)}
-                placeholder="customer@example.com"
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-slate-400"
-              />
-              <p className="text-xs text-slate-500">Must belong to an existing registered customer.</p>
+            <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm cursor-pointer hover:-translate-y-1 hover:shadow-md transition-all text-center" onClick={() => setView('email')}>
+              <div className="w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center bg-purple-50 text-purple-600"><Mail size={32} /></div>
+              <h3 className="font-bold text-lg mb-2">Email Interaction</h3>
+              <p className="text-sm text-slate-500">Simulate tracking rules and AI drafting for email channels.</p>
             </div>
-          )}
-
-          {user.role === 'cse' && (
-            <div className="flex flex-col gap-2">
-              <label className="text-sm font-medium text-slate-700">Source Channel</label>
-              <select
-                value={channel}
-                onChange={(e) => setChannel(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-slate-400"
-              >
-                <option value="Call">Call Center</option>
-                <option value="Email">Email</option>
-                <option value="Direct">Direct / In-Person</option>
-              </select>
+            <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm cursor-pointer hover:-translate-y-1 hover:shadow-md transition-all text-center" onClick={() => setView('live')}>
+              <div className="w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center bg-green-50 text-green-600"><Users size={32} /></div>
+              <h3 className="font-bold text-lg mb-2">Live Audio (D2D)</h3>
+              <p className="text-sm text-slate-500">Record audio to transcribe and submit live issues.</p>
             </div>
-          )}
+            <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm cursor-pointer hover:-translate-y-1 hover:shadow-md transition-all text-center" onClick={() => setView('agentic')}>
+              <div className="w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center bg-indigo-50 text-indigo-600"><Bot size={32} /></div>
+              <h3 className="font-bold text-lg mb-2">Agentic Mode</h3>
+              <p className="text-sm text-slate-500">Speak your issue. AI autonomously resolves it and generates a guide.</p>
+            </div>
+          </motion.div>
+        )}
 
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium text-slate-700">Complaint Description</label>
-            <textarea
-              required
-              rows={6}
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Describe the issue in detail..."
-              className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-slate-400 resize-none"
-            />
-          </div>
+        {view === 'text_init' && (
+          <motion.div key="text_init" initial={{y:20, opacity:0}} animate={{y:0, opacity:1}} exit={{opacity:0}}>
+            <div className="bg-white p-6 rounded-xl border border-slate-200 max-w-2xl mx-auto shadow-sm">
+              <h2 className="text-xl font-bold mb-2">Direct Complaint Entry</h2>
+              <p className="text-slate-500 mb-6">Provide the preliminary situation summary.</p>
+              <form onSubmit={handleStartTextChat}>
+                <textarea 
+                  value={directDesc} onChange={(e) => setDirectDesc(e.target.value)}
+                  placeholder="Describe the issue... (e.g. Broken packaging on batch #4)"
+                  rows={4} required
+                  className="w-full p-3 border border-slate-200 rounded-lg mb-4 focus:outline-none focus:border-blue-500"
+                />
+                <button type="submit" className="w-full py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50" disabled={isTyping}>
+                  {isTyping ? 'Generating ID...' : 'Submit & Initialize Agent'}
+                </button>
+              </form>
+            </div>
+          </motion.div>
+        )}
 
-          <div className="flex justify-end pt-2 border-t border-slate-100">
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="px-6 py-2 bg-slate-900 text-white font-medium text-sm rounded-lg hover:bg-slate-800 disabled:opacity-70 transition-colors"
-            >
-              {isSubmitting ? 'Submitting...' : 'Submit Complaint'}
-            </button>
-          </div>
-        </form>
-      </div>
+        {view === 'text_chat' && (
+          <motion.div key="text_chat" initial={{y:20, opacity:0}} animate={{y:0, opacity:1}} className="bg-white border border-slate-200 rounded-xl flex flex-col h-[600px] shadow-sm">
+            <div className="p-4 border-b border-slate-200 flex justify-between items-center">
+              <div className="flex gap-4 items-center">
+                <span className="px-3 py-1 bg-blue-600 text-white text-xs rounded-full">Tracking: {sessionComplaint?._id}</span>
+              </div>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-6 bg-slate-50">
+              {chatMessages.map((msg, idx) => (
+                <div key={idx} className={`flex gap-4 max-w-[80%] ${msg.role === 'user' ? 'self-end' : 'self-start'}`}>
+                  {msg.role === 'assistant' && <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0"><Bot size={16}/></div>}
+                  <div className={`p-4 rounded-xl ${msg.role === 'user' ? 'bg-blue-600 text-white' : 'bg-white border border-slate-200 text-slate-800'}`}>
+                    <p className="m-0">{msg.content}</p>
+                    {msg.isEscalated && <div className="mt-2 text-xs text-red-500 flex items-center gap-1"><AlertTriangle size={12}/> AI recommends manual escalation</div>}
+                  </div>
+                </div>
+              ))}
+              {isTyping && <div className="flex gap-4">
+                <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center"><Bot size={16}/></div>
+                <div className="p-4 rounded-xl bg-white border border-slate-200">...</div>
+              </div>}
+              <div ref={endOfChatRef} />
+            </div>
+
+            <div className="p-4 bg-white border-t border-slate-200 flex gap-2">
+              <input type="text" value={chatInput} onChange={e=>setChatInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleSendChat()} className="flex-1 p-3 rounded-full border border-slate-200 focus:outline-none focus:border-blue-500" placeholder="Type follow-up to customer..." />
+              <button className="w-12 h-12 rounded-full bg-blue-600 text-white flex items-center justify-center hover:bg-blue-700 shrink-0" onClick={handleSendChat}><Send size={18}/></button>
+            </div>
+          </motion.div>
+        )}
+
+        {view === 'email' && (
+          <motion.div key="email" initial={{y:20, opacity:0}} animate={{y:0, opacity:1}} className="flex gap-6">
+            <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex-1">
+              <h3 className="font-bold border-b border-slate-200 pb-2 mb-4">Compose Email</h3>
+              <div className="flex flex-col gap-4">
+                <div>
+                  <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1 block">Subject</label>
+                  <input type="text" value={emailSubject} onChange={e=>setEmailSubject(e.target.value)} className="w-full p-2 border border-slate-200 rounded-lg" placeholder="Email Subject" />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1 block">Body</label>
+                  <textarea value={emailBody} onChange={e=>setEmailBody(e.target.value)} placeholder="Describe the customer issue..." rows={8} className="w-full p-2 border border-slate-200 rounded-lg"></textarea>
+                </div>
+                <div className="flex gap-4">
+                  <button className="px-4 py-2 border border-slate-200 rounded-lg hover:bg-slate-50 text-sm font-medium" onClick={handleEmailDraft} disabled={isDrafting}>
+                    {isDrafting ? 'Drafting...' : 'Draft with AI'}
+                  </button>
+                  <button className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 flex items-center gap-2" onClick={handleEmailSubmit}>
+                    <Save size={16}/> Log Complaint
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div className="bg-slate-50 p-6 rounded-xl border border-slate-200 shadow-sm flex-1">
+              <h3 className="font-bold border-b border-slate-200 pb-2 mb-4">AI-Generated Draft</h3>
+              <div className="text-sm text-slate-700 whitespace-pre-wrap">
+                {emailDraft ? emailDraft : (
+                  <div className="text-center mt-12 text-slate-400">
+                    <Bot size={48} className="mx-auto mb-4 opacity-50"/>
+                    <p>Draft response will appear here.</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {view === 'live' && (
+          <motion.div key="live" initial={{y:20, opacity:0}} animate={{y:0, opacity:1}}>
+            <LiveD2DSession onFinish={async (transcript) => {
+              if (transcript) {
+                 try {
+                     const endpoint = user?.role === 'cse' ? '/complaints/staff' : '/complaints';
+                     const res = await api.post(endpoint, { description: "TRANSCRIPT: " + transcript, channel: 'Direct' });
+                     alert("Complaint logged! ID: " + res.data.complaint._id);
+                     navigate('/customer/complaints');
+                 } catch (e) {
+                     alert("Failed to register complaint.");
+                 }
+              }
+            }} />
+          </motion.div>
+        )}
+        {view === 'agentic' && (
+          <motion.div key="agentic" initial={{y:20, opacity:0}} animate={{y:0, opacity:1}} className="bg-white p-8 rounded-xl border border-slate-200 max-w-3xl mx-auto shadow-sm text-center">
+            {!agenticResult ? (
+               <div className="flex flex-col items-center">
+                 <div className="w-20 h-20 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mb-6">
+                   <Sparkles size={40} />
+                 </div>
+                 <h2 className="text-2xl font-bold mb-4 text-slate-800">Agentic Resolution Mode</h2>
+                 <p className="text-slate-500 mb-8 max-w-md">Speak your issue aloud. Resolvo AI will listen, analyze, and generate a visual guide autonomously.</p>
+                 <button 
+                   onClick={handleAgenticProcess}
+                   
+                   className={`px-8 py-3 rounded-full flex items-center gap-3 text-white font-medium transition-all ${isRecording ? 'bg-indigo-400 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700 hover:shadow-lg'}`}
+                 >
+                   {isRecording ? <MicOff size={20} /> : <Mic size={20} />}
+                   {isRecording ? 'Processing with AI...' : 'Start Recording'}
+                 </button>
+               </div>
+            ) : (
+               <div className="text-left">
+                 <div className="flex items-center gap-4 p-6 bg-green-50 border border-green-200 rounded-xl mb-8">
+                   <div className="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center shrink-0"><CheckCircle size={24}/></div>
+                   <div>
+                     <h3 className="font-bold text-green-800">Resolution Ready</h3>
+                     <p className="text-sm text-green-700">Case {agenticResult.complaint._id} analyzed and ready.</p>
+                   </div>
+                 </div>
+                 
+                 <div className="grid grid-cols-2 gap-4 mb-8">
+                   <div className="p-4 border border-slate-200 rounded-lg">
+                     <p className="text-xs text-slate-500 uppercase tracking-wider font-semibold mb-1">Category</p>
+                     <p className="font-bold text-slate-800">{agenticResult.analysis.category || 'N/A'}</p>
+                   </div>
+                   <div className="p-4 border border-slate-200 rounded-lg">
+                     <p className="text-xs text-slate-500 uppercase tracking-wider font-semibold mb-1">Priority</p>
+                     <p className="font-bold text-slate-800">{agenticResult.analysis.priority || 'Medium'}</p>
+                   </div>
+                 </div>
+                 
+                 <div className="p-6 bg-slate-50 border border-slate-200 rounded-xl mb-8">
+                   <h4 className="font-bold text-sm text-slate-500 uppercase tracking-wider mb-2">Transcription</h4>
+                   <p className="text-slate-700 italic">"{agenticResult.transcript}"</p>
+                 </div>
+                 
+                 <button className="w-full py-3 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700" onClick={() => navigate('/customer/complaints')}>
+                   Go to My Complaints
+                 </button>
+               </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

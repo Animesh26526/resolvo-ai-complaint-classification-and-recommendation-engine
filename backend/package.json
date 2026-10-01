@@ -9,7 +9,8 @@
     "test": "node test-auth.js && node test-complaints.js && node test-ai-integration.js",
     "test:auth": "node test-auth.js",
     "test:complaints": "node test-complaints.js",
-    "test:ai": "node test-ai-integration.js"
+    "test:ai": "node test-ai-integration.js",
+    "seed": "node seed.js"
   },
   "keywords": [
     "complaint-management",
