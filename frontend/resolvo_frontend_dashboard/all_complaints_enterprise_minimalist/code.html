@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script><script id="tailwind-config">tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "primary": "#0f172a",
+          "surface": "#f8fafc",
+          "surface-container": "#f1f5f9",
+          "text-main": "#0f172a",
+          "text-muted": "#64748b"
+        },
+        "fontFamily": {
+          "sans": ["Inter", "sans-serif"],
+          "code": ["JetBrains Mono", "monospace"]
+        },
+        "borderRadius": {
+          "xl": "0.75rem",
+          "lg": "0.5rem"
+        }
+      }
+    }
+  }</script></head><body class="bg-surface font-sans text-slate-900 antialiased selection:bg-slate-900 selection:text-white"><aside class="fixed left-0 top-0 h-full w-64 bg-slate-50 z-50 flex flex-col justify-between border-r border-slate-200"><div class="flex flex-col"><div class="h-16 px-5 flex items-center justify-between border-b border-slate-200"><div class="flex items-center gap-2.5"><div class="w-7 h-7 rounded-lg bg-slate-900 text-white flex items-center justify-center font-bold font-code text-xs">R</div><span class="text-base text-slate-900 font-semibold tracking-tight">Resolvo</span></div><span class="px-2 py-0.5 bg-slate-200/80 text-slate-600 font-code text-[11px] font-medium tracking-wide rounded">v2.4</span></div><div class="px-4 py-3"><div class="px-3 py-2 bg-white rounded-lg border border-slate-200 shadow-xs flex items-center justify-between"><div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-500"></span><span class="text-xs text-slate-800 font-medium">Operations Lead</span></div><span class="font-code text-[10px] text-slate-500 font-medium uppercase px-1.5 py-0.5 bg-slate-100 rounded">Tier 3</span></div></div><div class="px-5 mt-2 mb-1.5"><span class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold font-code">Navigation</span></div><nav class="flex flex-col gap-0.5 px-3"><a class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-200/60 hover:text-slate-900 text-sm font-medium transition-colors" data-path="operations-overview" href="#"><span class="material-symbols-outlined text-[18px] text-slate-400">dashboard</span><span>Operations Overview</span></a><a aria-current="page" class="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-slate-200/80 text-slate-900 font-semibold text-sm transition-colors" data-path="all-complaints" href="#"><span class="material-symbols-outlined text-[18px] text-slate-700">inbox</span><span>All Complaints</span></a><a class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-200/60 hover:text-slate-900 text-sm font-medium transition-colors" data-path="ai-re-review-and-qa" href="#"><span class="material-symbols-outlined text-[18px] text-slate-400">fact_check</span><span>AI Re-Review &amp; QA</span></a><a class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-200/60 hover:text-slate-900 text-sm font-medium transition-colors" data-path="sla-settings" href="#"><span class="material-symbols-outlined text-[18px] text-slate-400">timer</span><span>SLA Settings</span></a><a class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-200/60 hover:text-slate-900 text-sm font-medium transition-colors" data-path="submit-and-intakes" href="#"><span class="material-symbols-outlined text-[18px] text-slate-400">post_add</span><span>Submit &amp; Intakes</span></a><a class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-200/60 hover:text-slate-900 text-sm font-medium transition-colors" data-path="backup-and-export" href="#"><span class="material-symbols-outlined text-[18px] text-slate-400">cloud_download</span><span>Backup &amp; Export</span></a></nav></div><div class="p-4 border-t border-slate-200"><div class="px-3 py-2 bg-white rounded-lg border border-slate-200 shadow-xs flex items-center justify-between"><div class="flex items-center gap-2"><span class="material-symbols-outlined text-slate-500 text-[17px]">shield</span><span class="text-xs text-slate-700 font-medium">Audit Logging</span></div><span class="font-code text-[10px] px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 font-semibold">ACTIVE</span></div></div></aside><div class="pl-64 flex flex-col min-h-screen bg-slate-50/50"><header class="fixed top-0 left-64 right-0 h-16 bg-white border-b border-slate-200 z-40"><div class="w-full h-full px-6 flex items-center justify-between gap-4"><div class="flex items-center gap-4 flex-1 max-w-xl"><div class="relative w-full"><span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">search</span><input class="w-full pl-9 pr-4 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-slate-400 focus:bg-white transition-all shadow-xs" placeholder="Search complaint ID, customer, SLA status, or keywords (Ctrl + K)..." type="text"/></div></div><div class="flex items-center gap-3"><div class="flex items-center gap-2 px-3 py-1 rounded-lg bg-emerald-50 text-emerald-700"><span class="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></span><span class="font-code text-[11px] font-semibold tracking-tight uppercase">Core Heartbeat: 99.98%</span></div><div class="flex items-center gap-1.5 text-slate-600 px-3 py-1 bg-slate-100 rounded-lg"><span class="material-symbols-outlined text-[15px] text-slate-500">schedule</span><span class="font-code text-xs font-medium text-slate-700">14:42:09 IST</span></div><button aria-label="Notifications" class="relative p-1.5 rounded-lg border border-slate-200 bg-white text-slate-600 hover:text-slate-900 hover:border-slate-300 transition-colors shadow-xs"><span class="material-symbols-outlined text-[18px]">notifications</span><span class="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-rose-500"></span></button><div class="flex items-center gap-2 pl-2 border-l border-slate-200"><div class="flex items-center gap-2 cursor-pointer group"><img alt="Profile" class="w-8 h-8 rounded-full border border-slate-200 object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDSpEr17LuJbNOqJ0rhuWgmqr3k9cRwDgZr01OOU4kAaKPPwieplzA3aCgMSjM2VsjfZiKSZvBNEPpDm1hOGN6RF__kCdMDyFzD7fhFFBqdDgzba5wuNpobA4OPD3kAMd0dXWxvzpfndHz_KduBTUHNnvN4dvi5mRzUfaqix3NV64XIqCrCKozVC6WDHX7Qa2GIZ5keselLnGhOYaklGWRsgWFukIhM_0pkN96Mr2654Oxdyyx6ADFf"/><div class="hidden xl:flex flex-col text-left"><span class="text-xs font-semibold text-slate-900 leading-tight">Kavita Rao</span><span class="text-[11px] text-slate-500 leading-tight">Operations Manager</span></div><span class="material-symbols-outlined text-slate-400 group-hover:text-slate-900 text-[18px] transition-colors">arrow_drop_down</span></div></div></div></div></header><main class="relative w-full pt-16 flex-1"><div class="flex flex-col w-full">
+<div class="p-6 flex flex-col gap-6 max-w-[1720px] mx-auto w-full">
+<!-- Header with Operational Metrics Strip -->
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-200 pb-5">
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-3">
+<h1 class="text-2xl text-slate-900 font-bold tracking-tight">Complaint Management</h1>
+<span class="px-2.5 py-0.5 rounded-md bg-slate-100 text-slate-700 font-code text-[11px] font-semibold uppercase tracking-wider">Triage Live</span>
+</div>
+<p class="text-sm text-slate-500">
+          View, filter and triage all incoming support requests across omni-channel intake pipelines.
+        </p>
+</div>
+<!-- Action Cluster -->
+<div class="flex items-center gap-2.5">
+<button class="flex items-center gap-1.5 px-3.5 py-2 bg-white border border-slate-200 rounded-lg text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all text-sm font-medium shadow-xs" id="exportCsvBtn">
+<span class="material-symbols-outlined text-[17px] text-slate-500">download</span>
+<span>Export View</span>
+</button>
+<button class="flex items-center gap-1.5 px-3.5 py-2 bg-white border border-slate-200 rounded-lg text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all text-sm font-medium shadow-xs" id="batchAssignBtn">
+<span class="material-symbols-outlined text-[17px] text-slate-500">group_add</span>
+<span>Batch Assign</span>
+</button>
+<button class="flex items-center gap-1.5 px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 active:scale-[0.99] transition-all text-sm font-semibold shadow-xs" id="newComplaintBtn">
+<span class="material-symbols-outlined text-[18px]">add</span>
+<span>+ New Complaint</span>
+</button>
+</div>
+</div>
+<!-- Quick Operations Stats Bar (Unified Card Design) -->
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+<div class="p-5 bg-white rounded-xl border border-slate-200 shadow-xs flex items-center justify-between">
+<div>
+<p class="font-code text-[11px] text-slate-500 uppercase tracking-wider font-semibold">Active Queue</p>
+<p class="text-2xl font-bold text-slate-900 mt-1">14 <span class="text-xs text-slate-400 font-normal font-sans">cases</span></p>
+</div>
+<div class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center text-slate-700">
+<span class="material-symbols-outlined text-[20px]">inbox</span>
+</div>
+</div>
+<div class="p-5 bg-white rounded-xl border border-slate-200 shadow-xs flex items-center justify-between">
+<div>
+<p class="font-code text-[11px] text-rose-600 uppercase tracking-wider font-semibold">Breaching SLA</p>
+<p class="text-2xl font-bold text-rose-600 mt-1">3 <span class="text-xs text-slate-400 font-normal font-sans">&lt; 2 hrs</span></p>
+</div>
+<div class="w-10 h-10 rounded-lg bg-rose-50 flex items-center justify-center text-rose-600">
+<span class="material-symbols-outlined text-[20px]">timer_off</span>
+</div>
+</div>
+<div class="p-5 bg-white rounded-xl border border-slate-200 shadow-xs flex items-center justify-between">
+<div>
+<p class="font-code text-[11px] text-slate-500 uppercase tracking-wider font-semibold">AI Auto-Triage</p>
+<p class="text-2xl font-bold text-slate-900 mt-1">88.4% <span class="text-xs text-emerald-600 font-sans font-medium">↑ 4.2%</span></p>
+</div>
+<div class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center text-slate-700">
+<span class="material-symbols-outlined text-[20px]">smart_toy</span>
+</div>
+</div>
+<div class="p-5 bg-white rounded-xl border border-slate-200 shadow-xs flex items-center justify-between">
+<div>
+<p class="font-code text-[11px] text-slate-500 uppercase tracking-wider font-semibold">Avg Resolution</p>
+<p class="text-2xl font-bold text-slate-900 mt-1">4h 12m <span class="text-xs text-emerald-600 font-sans font-medium">-18m</span></p>
+</div>
+<div class="w-10 h-10 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-700">
+<span class="material-symbols-outlined text-[20px]">speed</span>
+</div>
+</div>
+</div>
+<!-- Advanced Filter Toolbar Card (Unified Card Design) -->
+<div class="p-5 bg-white rounded-xl border border-slate-200 shadow-xs flex flex-col gap-4">
+<div class="flex flex-col xl:flex-row items-stretch xl:items-center gap-3.5 justify-between">
+<!-- Live Search Input -->
+<div class="relative flex-1 min-w-[280px]">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">search</span>
+<input class="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-slate-400 focus:bg-white transition-all shadow-xs" id="complaintSearchInput" placeholder="Search by ID, customer name, keyword (e.g. 'Broken packaging', '#RES-9402', 'EMP-1024')..." type="text"/>
+</div>
+<!-- Dropdowns cluster -->
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-3 items-center">
+<!-- Category -->
+<div class="flex flex-col gap-1">
+<label class="font-code text-[10px] uppercase tracking-wider font-semibold text-slate-500">Category</label>
+<div class="relative">
+<select class="w-full appearance-none bg-slate-50 border border-slate-200 text-slate-900 px-3 py-1.5 pr-8 rounded-lg text-sm focus:outline-none focus:border-slate-400 cursor-pointer shadow-xs" id="filterCategory">
+<option value="All">All Categories</option>
+<option value="Product">Product Quality</option>
+<option value="Packaging">Packaging Damage</option>
+<option value="Trade">Trade &amp; Billing</option>
+<option value="Logistics">Logistics &amp; Delay</option>
+</select>
+<span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[16px]">expand_more</span>
+</div>
+</div>
+<!-- Priority -->
+<div class="flex flex-col gap-1">
+<label class="font-code text-[10px] uppercase tracking-wider font-semibold text-slate-500">Priority</label>
+<div class="relative">
+<select class="w-full appearance-none bg-slate-50 border border-slate-200 text-slate-900 px-3 py-1.5 pr-8 rounded-lg text-sm focus:outline-none focus:border-slate-400 cursor-pointer shadow-xs" id="filterPriority">
+<option value="All">All Priorities</option>
+<option value="High">High</option>
+<option value="Medium">Medium</option>
+<option value="Low">Low</option>
+</select>
+<span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[16px]">expand_more</span>
+</div>
+</div>
+<!-- Status -->
+<div class="flex flex-col gap-1">
+<label class="font-code text-[10px] uppercase tracking-wider font-semibold text-slate-500">Status</label>
+<div class="relative">
+<select class="w-full appearance-none bg-slate-50 border border-slate-200 text-slate-900 px-3 py-1.5 pr-8 rounded-lg text-sm focus:outline-none focus:border-slate-400 cursor-pointer shadow-xs" id="filterStatus">
+<option value="All">All Statuses</option>
+<option value="Open">Open</option>
+<option value="In Progress">In Progress</option>
+<option value="Escalated">Escalated</option>
+<option value="Resolved">Resolved</option>
+</select>
+<span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[16px]">expand_more</span>
+</div>
+</div>
+<!-- Channel -->
+<div class="flex flex-col gap-1">
+<label class="font-code text-[10px] uppercase tracking-wider font-semibold text-slate-500">Channel</label>
+<div class="relative">
+<select class="w-full appearance-none bg-slate-50 border border-slate-200 text-slate-900 px-3 py-1.5 pr-8 rounded-lg text-sm focus:outline-none focus:border-slate-400 cursor-pointer shadow-xs" id="filterChannel">
+<option value="All">All Channels</option>
+<option value="Text/Direct">Text / Direct</option>
+<option value="Email">Email Support</option>
+<option value="Call">Call Center</option>
+<option value="Live Audio D2D">Live Audio D2D</option>
+</select>
+<span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[16px]">expand_more</span>
+</div>
+</div>
+</div>
+<!-- Filter Reset -->
+<div class="flex items-center gap-2 self-end xl:self-center pt-2 xl:pt-4">
+<button class="flex items-center gap-1 px-3 py-1.5 border border-transparent text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg text-sm font-medium transition-colors" id="clearFiltersBtn">
+<span class="material-symbols-outlined text-[16px]">filter_alt_off</span>
+<span>Clear</span>
+</button>
+</div>
+</div>
+<!-- Quick Sub-Toolbar with Count indicator & Active filter tags -->
+<div class="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-slate-100 text-xs">
+<div class="flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+<span class="text-slate-600 font-medium" id="recordCountIndicator">
+            Showing <span class="text-slate-900 font-semibold font-code">14</span> active records
+          </span>
+<span class="text-slate-400 font-code text-[11px]">| Auto-sync 30s</span>
+</div>
+<div class="flex items-center gap-1.5 text-[11px] text-slate-500">
+<span class="material-symbols-outlined text-[14px]">tune</span>
+<span>Applied: <strong class="text-slate-700 font-medium font-code" id="activeFilterSummary">None (Showing All)</strong></span>
+</div>
+</div>
+</div>
+<!-- Rich Interactive Data Table Canvas (Unified Card Design) -->
+<div class="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden flex flex-col">
+<div class="overflow-x-auto w-full">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-slate-50 text-slate-500 font-code text-[11px] uppercase tracking-wider border-b border-slate-200">
+<th class="py-3 px-3 pl-5 w-10 text-center">
+<input class="rounded border-slate-300 cursor-pointer accent-slate-900" id="selectAllCheckbox" type="checkbox"/>
+</th>
+<th class="py-3 px-3">Complaint ID</th>
+<th class="py-3 px-3 min-w-[260px]">Title &amp; Category</th>
+<th class="py-3 px-3">Source Channel</th>
+<th class="py-3 px-3">Priority</th>
+<th class="py-3 px-3">Status</th>
+<th class="py-3 px-3 min-w-[170px]">Assigned Agent</th>
+<th class="py-3 px-3 min-w-[130px]">Submitted (IST)</th>
+<th class="py-3 px-3 min-w-[120px]">SLA Countdown</th>
+<th class="py-3 px-3 pr-5 text-right">Quick Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100 text-sm" id="complaintTableBody">
+<!-- Row 1: High Urgency Packaging -->
+<tr class="hover:bg-slate-50/60 transition-colors group" data-category="Packaging" data-channel="Call" data-id="#RES-9402" data-priority="High" data-status="In Progress" data-title="Crushed cartons in freight transit LOT-991">
+<td class="py-4 px-3 pl-5 text-center">
+<input class="case-select rounded border-slate-300 cursor-pointer accent-slate-900" type="checkbox"/>
+</td>
+<td class="py-4 px-3">
+<span class="px-2 py-0.5 bg-slate-100 text-slate-900 font-code text-xs font-semibold rounded">#RES-9402</span>
+</td>
+<td class="py-4 px-3">
+<div class="flex flex-col">
+<a class="font-semibold text-slate-900 hover:text-slate-600 transition-colors" href="#">Crushed cartons in freight transit LOT-991</a>
+<span class="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
+<span>Packaging</span> • <span class="text-slate-600">B2B Distributor West</span>
+</span>
+</div>
+</td>
+<td class="py-4 px-3">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-slate-100 text-slate-700 text-xs font-medium">
+<span class="material-symbols-outlined text-[13px] text-slate-500">call</span>
+                  Call Center
+                </span>
+</td>
+<td class="py-4 px-3">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded bg-rose-50 text-rose-700 font-code text-[11px] font-semibold uppercase">
+<span class="w-1.5 h-1.5 rounded-full bg-rose-600"></span>
+                  High
+                </span>
+</td>
+<td class="py-4 px-3">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded bg-amber-50 text-amber-700 font-code text-[11px] font-semibold uppercase">
+                  In Progress
+                </span>
+</td>
+<td class="py-4 px-3">
+<div class="flex items-center gap-2">
+<img class="w-6 h-6 rounded-full object-cover border border-slate-200" data-alt="Professional headshot of male operations officer in crisp uniform, soft studio lighting, ultra clean composition" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCicNov2JEu9RNP6crFHrsnNoPJDwc-YjVjINfDEnVDYIfKqV5imhGgBb6fbCHaDYZsZt4nGqfsZpL-LPf9-ohl0rYroPpElEQdhDhrNWNI35K1CHvKSyHs_3feDTocR2znqIoJDxmcyqyCSZVQnIVXaWB5VVJKCL1KA2Kk4-DO62ZPCvHawfg1aYizCGWT7-Z2l9HAz4RIREt7aGFvZoB9EotHmcVmJe8q_oY1u3ZE_7GqKVPkir89"/>
+<span class="font-medium text-slate-800 text-xs">Devendra S.</span>
+</div>
+</td>
+<td class="py-4 px-3 text-slate-500 text-xs">
+<span class="text-slate-800 font-medium">Today</span>, 13:40 IST
+              </td>
+<td class="py-4 px-3">
+<span class="inline-flex items-center gap-1 text-rose-600 font-code text-xs font-semibold">
+<span class="material-symbols-outlined text-[15px]">timer</span>
+<span>01h 14m</span>
+</span>
+</td>
+<td class="py-4 px-3 pr-5 text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="p-1 hover:bg-slate-100 text-slate-400 hover:text-slate-800 rounded transition-colors" title="View Detail">
+<span class="material-symbols-outlined text-[17px]">visibility</span>
+</button>
+<button class="p-1 hover:bg-emerald-50 text-slate-400 hover:text-emerald-700 rounded transition-colors" title="Mark Resolved">
+<span class="material-symbols-outlined text-[17px]">check_circle</span>
+</button>
+<button class="p-1 hover:bg-rose-50 text-slate-400 hover:text-rose-700 rounded transition-colors" title="Escalate">
+<span class="material-symbols-outlined text-[17px]">priority_high</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 2: Escalated Trade Dispute -->
+<tr class="hover:bg-slate-50/60 transition-colors group" data-category="Trade" data-channel="Live Audio D2D" data-id="#RES-9398" data-priority="High" data-status="Escalated" data-title="GST mismatch on bulk seasonal consignments">
+<td class="py-4 px-3 pl-5 text-center">
+<input class="case-select rounded border-slate-300 cursor-pointer accent-slate-900" type="checkbox"/>
+</td>
+<td class="py-4 px-3">
+<span class="px-2 py-0.5 bg-slate-100 text-slate-900 font-code text-xs font-semibold rounded">#RES-9398</span>
+</td>
+<td class="py-4 px-3">
+<div class="flex flex-col">
+<a class="font-semibold text-slate-900 hover:text-slate-600 transition-colors" href="#">GST mismatch on bulk seasonal consignments</a>
+<span class="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
+<span>Trade</span> • <span class="text-slate-600">Apex Retails Corp</span>
+</span>
+</div>
+</td>
+<td class="py-4 px-3">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-slate-100 text-slate-700 text-xs font-medium">
+<span class="material-symbols-outlined text-[13px] text-slate-500">record_voice_over</span>
+                  Live Audio D2D
+                </span>
+</td>
+<td class="py-4 px-3">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded bg-rose-50 text-rose-700 font-code text-[11px] font-semibold uppercase">
+<span class="w-1.5 h-1.5 rounded-full bg-rose-600"></span>
+                  High
+                </span>
+</td>
+<td class="py-4 px-3">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded bg-purple-50 text-purple-700 font-code text-[11px] font-semibold uppercase">
+                  Escalated
+                </span>
+</td>
+<td class="py-4 px-3">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center font-bold text-[10px]">KR</div>
+<span class="font-medium text-slate-800 text-xs">Kavita Rao</span>
+</div>
+</td>
+<td class="py-4 px-3 text-slate-500 text-xs">
+<span class="text-slate-800 font-medium">Today</span>, 12:15 IST
+              </td>
+<td class="py-4 px-3">
+<span class="inline-flex items-center gap-1 text-rose-700 font-code text-xs font-semibold">
+<span class="material-symbols-outlined text-[15px]">warning</span>
+<span>BREACHED</span>
+</span>
+</td>
+<td class="py-4 px-3 pr-5 text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="p-1 hover:bg-slate-100 text-slate-400 hover:text-slate-800 rounded transition-colors" title="View Detail">
+<span class="material-symbols-outlined text-[17px]">visibility</span>
+</button>
+<button class="p-1 hover:bg-emerald-50 text-slate-400 hover:text-emerald-700 rounded transition-colors" title="Mark Resolved">
+<span class="material-symbols-outlined text-[17px]">check_circle</span>
+</button>
+<button class="p-1 hover:bg-rose-50 text-slate-400 hover:text-rose-700 rounded transition-colors" title="Escalate">
+<span class="material-symbols-outlined text-[17px]">priority_high</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 3: Product Quality (Medium) -->
+<tr class="hover:bg-slate-50/60 transition-colors group" data-category="Product" data-channel="Text/Direct" data-id="#RES-9387" data-priority="Medium" data-status="Open" data-title="Seal integrity defect in Batch #441A beverages">
+<td class="py-4 px-3 pl-5 text-center">
+<input class="case-select rounded border-slate-300 cursor-pointer accent-slate-900" type="checkbox"/>
+</td>
+<td class="py-4 px-3">
+<span class="px-2 py-0.5 bg-slate-100 text-slate-900 font-code text-xs font-semibold rounded">#RES-9387</span>
+</td>
+<td class="py-4 px-3">
+<div class="flex flex-col">
+<a class="font-semibold text-slate-900 hover:text-slate-600 transition-colors" href="#">Seal integrity defect in Batch #441A beverages</a>
+<span class="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
+<span>Product</span> • <span class="text-slate-600">Nexus Supermarts</span>
+</span>
+</div>
+</td>
+<td class="py-4 px-3">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-slate-100 text-slate-700 text-xs font-medium">
+<span class="material-symbols-outlined text-[13px] text-slate-500">sms</span>
+                  Text / Direct
+                </span>
+</td>
+<td class="py-4 px-3">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded bg-amber-50 text-amber-700 font-code text-[11px] font-semibold uppercase">
+                  Medium
+                </span>
+</td>
+<td class="py-4 px-3">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded bg-blue-50 text-blue-700 font-code text-[11px] font-semibold uppercase">
+                  Open
+                </span>
+</td>
+<td class="py-4 px-3">
+<div class="flex items-center gap-2">
+<span class="w-6 h-6 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center font-code text-[10px]">--</span>
+<span class="text-xs text-slate-400 italic">Unassigned</span>
+</div>
+</td>
+<td class="py-4 px-3 text-slate-500 text-xs">
+<span class="text-slate-800 font-medium">Today</span>, 11:02 IST
+              </td>
+<td class="py-4 px-3">
+<span class="inline-flex items-center gap-1 text-slate-600 font-code text-xs font-medium">
+<span class="material-symbols-outlined text-[15px] text-slate-400">schedule</span>
+<span>03h 48m</span>
+</span>
+</td>
+<td class="py-4 px-3 pr-5 text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="p-1 hover:bg-slate-100 text-slate-400 hover:text-slate-800 rounded transition-colors" title="View Detail">
+<span class="material-symbols-outlined text-[17px]">visibility</span>
+</button>
+<button class="p-1 hover:bg-emerald-50 text-slate-400 hover:text-emerald-700 rounded transition-colors" title="Mark Resolved">
+<span class="material-symbols-outlined text-[17px]">check_circle</span>
+</button>
+<button class="p-1 hover:bg-rose-50 text-slate-400 hover:text-rose-700 rounded transition-colors" title="Escalate">
+<span class="material-symbols-outlined text-[17px]">priority_high</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 4: Logistics & Delay (Low) -->
+<tr class="hover:bg-slate-50/60 transition-colors group" data-category="Logistics" data-channel="Email" data-id="#RES-9372" data-priority="Low" data-status="In Progress" data-title="Delivery window deviation (+48 hours) Northern hub">
+<td class="py-4 px-3 pl-5 text-center">
+<input class="case-select rounded border-slate-300 cursor-pointer accent-slate-900" type="checkbox"/>
+</td>
+<td class="py-4 px-3">
+<span class="px-2 py-0.5 bg-slate-100 text-slate-900 font-code text-xs font-semibold rounded">#RES-9372</span>
+</td>
+<td class="py-4 px-3">
+<div class="flex flex-col">
+<a class="font-semibold text-slate-900 hover:text-slate-600 transition-colors" href="#">Delivery window deviation (+48 hours) Northern hub</a>
+<span class="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
+<span>Logistics</span> • <span class="text-slate-600">Punjab Agro Logistics</span>
+</span>
+</div>
+</td>
+<td class="py-4 px-3">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-slate-100 text-slate-700 text-xs font-medium">
+<span class="material-symbols-outlined text-[13px] text-slate-500">mail</span>
+                  Email Support
+                </span>
+</td>
+<td class="py-4 px-3">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded bg-slate-100 text-slate-700 font-code text-[11px] font-semibold uppercase">
+                  Low
+                </span>
+</td>
+<td class="py-4 px-3">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded bg-amber-50 text-amber-700 font-code text-[11px] font-semibold uppercase">
+                  In Progress
+                </span>
+</td>
+<td class="py-4 px-3">
+<div class="flex items-center gap-2">
+<img class="w-6 h-6 rounded-full object-cover border border-slate-200" data-alt="Portrait of an Indian customer service specialist smiling confidently in business casual against modern office background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBh8nwd5WXm95NDJ3HIOhbriXjKdsvrcjvQGIvT6Zimu9fzrgAoTJ13ROb-ayMLLs4ZLdhuRSoswXsfQN9UdD-DLdJOrY1WMvKOuhRRevPoou0N0BvQ04iZ2aP7thK-nEmv6KuAHRiJwJUR48Eeg2TUxogjsy7bX4BqnrRgIZt2KV6Jy82O06UzWEbDMXGhEc5SDL8h9Bk9xDbP1eNzirKnrawDXmTTTpCZBeYyYu3Bvb0CnxsRUqto"/>
+<span class="font-medium text-slate-800 text-xs">Ayesha Khan</span>
+</div>
+</td>
+<td class="py-4 px-3 text-slate-500 text-xs">
+                Yesterday, 17:30 IST
+              </td>
+<td class="py-4 px-3">
+<span class="inline-flex items-center gap-1 text-slate-600 font-code text-xs font-medium">
+<span class="material-symbols-outlined text-[15px] text-slate-400">schedule</span>
+<span>14h 20m</span>
+</span>
+</td>
+<td class="py-4 px-3 pr-5 text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="p-1 hover:bg-slate-100 text-slate-400 hover:text-slate-800 rounded transition-colors" title="View Detail">
+<span class="material-symbols-outlined text-[17px]">visibility</span>
+</button>
+<button class="p-1 hover:bg-emerald-50 text-slate-400 hover:text-emerald-700 rounded transition-colors" title="Mark Resolved">
+<span class="material-symbols-outlined text-[17px]">check_circle</span>
+</button>
+<button class="p-1 hover:bg-rose-50 text-slate-400 hover:text-rose-700 rounded transition-colors" title="Escalate">
+<span class="material-symbols-outlined text-[17px]">priority_high</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 5: Resolved Product Case -->
+<tr class="hover:bg-slate-50/60 transition-colors group opacity-85 hover:opacity-100" data-category="Product" data-channel="Email" data-id="#RES-9366" data-priority="Medium" data-status="Resolved" data-title="Off-odor reported in canned concentrate 500ml">
+<td class="py-4 px-3 pl-5 text-center">
+<input class="case-select rounded border-slate-300 cursor-pointer accent-slate-900" type="checkbox"/>
+</td>
+<td class="py-4 px-3">
+<span class="px-2 py-0.5 bg-slate-100 text-slate-900 font-code text-xs font-semibold rounded">#RES-9366</span>
+</td>
+<td class="py-4 px-3">
+<div class="flex flex-col">
+<a class="font-medium text-slate-600 hover:text-slate-900 transition-colors line-through decoration-slate-300" href="#">Off-odor reported in canned concentrate 500ml</a>
+<span class="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
+<span>Product</span> • <span class="text-slate-600">QuickBite Outlets</span>
+</span>
+</div>
+</td>
+<td class="py-4 px-3">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-slate-100 text-slate-700 text-xs font-medium">
+<span class="material-symbols-outlined text-[13px] text-slate-500">mail</span>
+                  Email Support
+                </span>
+</td>
+<td class="py-4 px-3">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded bg-amber-50 text-amber-700 font-code text-[11px] font-semibold uppercase">
+                  Medium
+                </span>
+</td>
+<td class="py-4 px-3">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded bg-emerald-50 text-emerald-700 font-code text-[11px] font-semibold uppercase">
+<span class="material-symbols-outlined text-[13px]">check</span>
+                  Resolved
+                </span>
+</td>
+<td class="py-4 px-3">
+<div class="flex items-center gap-2">
+<img class="w-6 h-6 rounded-full object-cover border border-slate-200" data-alt="Portrait of an enterprise technical operations analyst with spectacles in modern workstation setting with soft ambient illumination" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCASoun-ysoy7xYxLr03fs9oq0sGlfjTTD92koZ_1QDnSXkAeil24-N8xlRfZrcStFNlI2gjWZjiaurJO7Me-zWTtkZT0XOUjdaZOcKUvfDL2zel4gBM04EHvzUDvpS440kVrtmVzq_2YetP5yu--7rKikCHA-YupoNfVIZ718yfSo2hJRTL-cGA5WxEl9STyzOfrvXFOb8mjkps3KQio-O2DB2kkWZr1SbM-9gUJkbElHoS0j_Ltn4"/>
+<span class="font-medium text-slate-800 text-xs">Rohan Verma</span>
+</div>
+</td>
+<td class="py-4 px-3 text-slate-500 text-xs">
+                Yesterday, 09:14 IST
+              </td>
+<td class="py-4 px-3">
+<span class="inline-flex items-center gap-1 text-emerald-700 font-code text-xs font-medium">
+<span class="material-symbols-outlined text-[15px]">verified</span>
+<span>Met: 2h 45m</span>
+</span>
+</td>
+<td class="py-4 px-3 pr-5 text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="p-1 hover:bg-slate-100 text-slate-400 hover:text-slate-800 rounded transition-colors" title="View Detail">
+<span class="material-symbols-outlined text-[17px]">visibility</span>
+</button>
+<button class="p-1 hover:bg-slate-100 text-slate-400 hover:text-slate-800 rounded transition-colors" title="Re-open">
+<span class="material-symbols-outlined text-[17px]">restart_alt</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 6: Packaging Leakage -->
+<tr class="hover:bg-slate-50/60 transition-colors group" data-category="Packaging" data-channel="Call" data-id="#RES-9351" data-priority="High" data-status="Open" data-title="Secondary seal leakage in cold chain pallet #08">
+<td class="py-4 px-3 pl-5 text-center">
+<input class="case-select rounded border-slate-300 cursor-pointer accent-slate-900" type="checkbox"/>
+</td>
+<td class="py-4 px-3">
+<span class="px-2 py-0.5 bg-slate-100 text-slate-900 font-code text-xs font-semibold rounded">#RES-9351</span>
+</td>
+<td class="py-4 px-3">
+<div class="flex flex-col">
+<a class="font-semibold text-slate-900 hover:text-slate-600 transition-colors" href="#">Secondary seal leakage in cold chain pallet #08</a>
+<span class="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
+<span>Packaging</span> • <span class="text-slate-600">Breeze Chill Hubs</span>
+</span>
+</div>
+</td>
+<td class="py-4 px-3">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-slate-100 text-slate-700 text-xs font-medium">
+<span class="material-symbols-outlined text-[13px] text-slate-500">call</span>
+                  Call Center
+                </span>
+</td>
+<td class="py-4 px-3">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded bg-rose-50 text-rose-700 font-code text-[11px] font-semibold uppercase">
+<span class="w-1.5 h-1.5 rounded-full bg-rose-600"></span>
+                  High
+                </span>
+</td>
+<td class="py-4 px-3">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded bg-blue-50 text-blue-700 font-code text-[11px] font-semibold uppercase">
+                  Open
+                </span>
+</td>
+<td class="py-4 px-3">
+<div class="flex items-center gap-2">
+<img class="w-6 h-6 rounded-full object-cover border border-slate-200" data-alt="Portrait photo of a young female tech compliance officer with clean modern corporate background and crisp daylight" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBWDy7ls9gpQKeEcuS8JC_sBy-GRSFWWAjL4WeWd2B1n5_amBJAHnaGCz3fqp32pBIE_vI7FBHy6QelJgNO4KwMAJdnYOFOCcJuxXCcIOQirybNLwGhUmyfy943hoummbx6EXsPjLqnBHSOzUBkIbMh5f5nzktl6jtmmHuKvACMjWgkqKsFRDjA2cr8ZgcKW-7pusLJOIKPiA3aiuYTPhvwAbKs1zWIBl4uSDvEfx5HloTvAnDPvb66"/>
+<span class="font-medium text-slate-800 text-xs">Devendra S.</span>
+</div>
+</td>
+<td class="py-4 px-3 text-slate-500 text-xs">
+                Oct 24, 16:10 IST
+              </td>
+<td class="py-4 px-3">
+<span class="inline-flex items-center gap-1 text-rose-600 font-code text-xs font-semibold">
+<span class="material-symbols-outlined text-[15px]">timer</span>
+<span>00h 42m</span>
+</span>
+</td>
+<td class="py-4 px-3 pr-5 text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="p-1 hover:bg-slate-100 text-slate-400 hover:text-slate-800 rounded transition-colors" title="View Detail">
+<span class="material-symbols-outlined text-[17px]">visibility</span>
+</button>
+<button class="p-1 hover:bg-emerald-50 text-slate-400 hover:text-emerald-700 rounded transition-colors" title="Mark Resolved">
+<span class="material-symbols-outlined text-[17px]">check_circle</span>
+</button>
+<button class="p-1 hover:bg-rose-50 text-slate-400 hover:text-rose-700 rounded transition-colors" title="Escalate">
+<span class="material-symbols-outlined text-[17px]">priority_high</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Empty State Container -->
+<div class="hidden p-10 flex-col items-center justify-center text-center" id="tableEmptyState">
+<div class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center text-slate-400 mb-3">
+<span class="material-symbols-outlined text-[22px]">search_off</span>
+</div>
+<p class="text-base text-slate-900 font-semibold">No complaints match your criteria</p>
+<p class="text-xs text-slate-500 max-w-md mt-1">
+          Adjust your active filters, search query, or clear criteria to inspect the remaining backlog.
+        </p>
+<button class="mt-4 px-4 py-2 bg-slate-900 text-white rounded-lg text-xs font-medium hover:bg-slate-800 shadow-xs" id="resetFromEmptyBtn">
+          Reset All Filters
+        </button>
+</div>
+<!-- Table Pagination and Status Summary Footer -->
+<div class="px-5 py-3 bg-slate-50/70 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-1.5 text-slate-500 font-code text-[11px]">
+<span>Rows:</span>
+<select class="bg-white text-slate-800 border border-slate-200 rounded-md px-2 py-0.5 text-xs font-sans focus:outline-none cursor-pointer shadow-xs">
+<option>10</option>
+<option>25</option>
+<option>50</option>
+</select>
+</div>
+<span class="text-slate-500 text-xs">Showing <strong class="text-slate-800 font-medium">1 - 6</strong> of <strong class="text-slate-800 font-medium">14</strong> records</span>
+</div>
+<div class="flex items-center gap-1">
+<button class="p-1 rounded-md border border-slate-200 bg-white text-slate-400 hover:text-slate-900 disabled:opacity-40 transition-colors shadow-xs" disabled="">
+<span class="material-symbols-outlined text-[16px]">first_page</span>
+</button>
+<button class="p-1 rounded-md border border-slate-200 bg-white text-slate-400 hover:text-slate-900 disabled:opacity-40 transition-colors shadow-xs" disabled="">
+<span class="material-symbols-outlined text-[16px]">chevron_left</span>
+</button>
+<button class="w-6 h-6 rounded-md bg-slate-900 text-white font-code text-xs font-semibold shadow-xs">1</button>
+<button class="w-6 h-6 rounded-md border border-slate-200 bg-white text-slate-600 hover:text-slate-900 font-code text-xs transition-colors shadow-xs">2</button>
+<button class="w-6 h-6 rounded-md border border-slate-200 bg-white text-slate-600 hover:text-slate-900 font-code text-xs transition-colors shadow-xs">3</button>
+<button class="p-1 rounded-md border border-slate-200 bg-white text-slate-600 hover:text-slate-900 transition-colors shadow-xs">
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+</button>
+<button class="p-1 rounded-md border border-slate-200 bg-white text-slate-600 hover:text-slate-900 transition-colors shadow-xs">
+<span class="material-symbols-outlined text-[16px]">last_page</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Live System Toast Indicator -->
+<div class="fixed bottom-6 right-6 hidden bg-slate-900 text-white px-4 py-2.5 rounded-lg border border-slate-800 shadow-xl flex items-center gap-2.5 z-50 text-xs font-medium" id="toastNotification">
+<span class="material-symbols-outlined text-emerald-400 text-[18px]">check_circle</span>
+<span id="toastMessage">Action updated successfully.</span>
+</div>
+</div>
+</div>
+<script>
+  (function() {
+    const searchInput = document.getElementById('complaintSearchInput');
+    const filterCategory = document.getElementById('filterCategory');
+    const filterPriority = document.getElementById('filterPriority');
+    const filterStatus = document.getElementById('filterStatus');
+    const filterChannel = document.getElementById('filterChannel');
+    const clearFiltersBtn = document.getElementById('clearFiltersBtn');
+    const resetFromEmptyBtn = document.getElementById('resetFromEmptyBtn');
+    const rows = document.querySelectorAll('#complaintTableBody tr');
+    const emptyState = document.getElementById('tableEmptyState');
+    const recordCountIndicator = document.getElementById('recordCountIndicator');
+    const activeFilterSummary = document.getElementById('activeFilterSummary');
+    const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+    const caseSelects = document.querySelectorAll('.case-select');
+    const toastNotification = document.getElementById('toastNotification');
+    const toastMessage = document.getElementById('toastMessage');
+
+    function showToast(msg) {
+      if (!toastNotification) return;
+      toastMessage.textContent = msg;
+      toastNotification.classList.remove('hidden');
+      setTimeout(() => {
+        toastNotification.classList.add('hidden');
+      }, 3200);
+    }
+
+    function applyFilters() {
+      const q = (searchInput.value || '').toLowerCase().trim();
+      const cat = filterCategory.value;
+      const prio = filterPriority.value;
+      const stat = filterStatus.value;
+      const chan = filterChannel.value;
+
+      let visibleCount = 0;
+
+      rows.forEach(row => {
+        const rowCat = row.getAttribute('data-category') || '';
+        const rowPrio = row.getAttribute('data-priority') || '';
+        const rowStat = row.getAttribute('data-status') || '';
+        const rowChan = row.getAttribute('data-channel') || '';
+        const rowId = (row.getAttribute('data-id') || '').toLowerCase();
+        const rowTitle = (row.getAttribute('data-title') || '').toLowerCase();
+
+        const matchSearch = !q || rowId.includes(q) || rowTitle.includes(q);
+        const matchCat = cat === 'All' || rowCat === cat;
+        const matchPrio = prio === 'All' || rowPrio === prio;
+        const matchStat = stat === 'All' || rowStat === stat;
+        const matchChan = chan === 'All' || rowChan === chan;
+
+        if (matchSearch && matchCat && matchPrio && matchStat && matchChan) {
+          row.style.display = '';
+          visibleCount++;
+        } else {
+          row.style.display = 'none';
+        }
+      });
+
+      if (emptyState) {
+        if (visibleCount === 0) {
+          emptyState.classList.remove('hidden');
+          emptyState.classList.add('flex');
+        } else {
+          emptyState.classList.add('hidden');
+          emptyState.classList.remove('flex');
+        }
+      }
+
+      if (recordCountIndicator) {
+        recordCountIndicator.innerHTML = 'Showing <span class="text-slate-900 font-semibold font-code">' + visibleCount + '</span> active records';
+      }
+
+      // Summary label
+      const activePills = [];
+      if (q) activePills.push('Search: "' + q + '"');
+      if (cat !== 'All') activePills.push('Cat: ' + cat);
+      if (prio !== 'All') activePills.push('Priority: ' + prio);
+      if (stat !== 'All') activePills.push('Status: ' + stat);
+      if (chan !== 'All') activePills.push('Channel: ' + chan);
+
+      if (activeFilterSummary) {
+        activeFilterSummary.textContent = activePills.length > 0 ? activePills.join(', ') : 'None (Showing All)';
+      }
+    }
+
+    function resetFilters() {
+      if (searchInput) searchInput.value = '';
+      if (filterCategory) filterCategory.value = 'All';
+      if (filterPriority) filterPriority.value = 'All';
+      if (filterStatus) filterStatus.value = 'All';
+      if (filterChannel) filterChannel.value = 'All';
+      applyFilters();
+      showToast('Filters cleared to default operational view');
+    }
+
+    [searchInput, filterCategory, filterPriority, filterStatus, filterChannel].forEach(el => {
+      if (el) {
+        el.addEventListener('input', applyFilters);
+        el.addEventListener('change', applyFilters);
+      }
+    });
+
+    if (clearFiltersBtn) clearFiltersBtn.addEventListener('click', resetFilters);
+    if (resetFromEmptyBtn) resetFromEmptyBtn.addEventListener('click', resetFilters);
+
+    // Multi-select bulk checkbox
+    if (selectAllCheckbox) {
+      selectAllCheckbox.addEventListener('change', (e) => {
+        caseSelects.forEach(cb => {
+          cb.checked = e.target.checked;
+        });
+      });
+    }
+
+    // Action buttons micro-interactions
+    document.querySelectorAll('[title="Mark Resolved"]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const tr = btn.closest('tr');
+        const id = tr.getAttribute('data-id');
+        showToast('Complaint ' + id + ' marked as Resolved.');
+      });
+    });
+
+    document.querySelectorAll('[title="Escalate"]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const tr = btn.closest('tr');
+        const id = tr.getAttribute('data-id');
+        showToast('Urgent escalation logged for ' + id + ' to Operations Lead.');
+      });
+    });
+
+    const exportBtn = document.getElementById('exportCsvBtn');
+    if (exportBtn) {
+      exportBtn.addEventListener('click', () => {
+        showToast('Exporting filtered queue data to CSV...');
+      });
+    }
+
+    const batchAssignBtn = document.getElementById('batchAssignBtn');
+    if (batchAssignBtn) {
+      batchAssignBtn.addEventListener('click', () => {
+        const checkedCount = document.querySelectorAll('.case-select:checked').length;
+        if (checkedCount === 0) {
+          showToast('Please select at least one complaint from the list');
+        } else {
+          showToast('Batch reassign dialog opened for ' + checkedCount + ' cases.');
+        }
+      });
+    }
+
+    const newComplaintBtn = document.getElementById('newComplaintBtn');
+    if (newComplaintBtn) {
+      newComplaintBtn.addEventListener('click', () => {
+        showToast('Navigating to Intake Registration modal...');
+      });
+    }
+  })();
+</script></main></div></body></html>
