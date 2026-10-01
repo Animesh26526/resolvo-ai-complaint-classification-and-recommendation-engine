@@ -1,8 +1,8 @@
+// Defines the MongoDB schema for complaint resolution and recommendation tracking.
+
 const mongoose = require("mongoose");
 
-
 const resolutionSchema = new mongoose.Schema({
-
     resolutionId: {
         type: String,
         required: true,
@@ -47,23 +47,17 @@ const resolutionSchema = new mongoose.Schema({
     timestamps: true,
 });
 
-
 resolutionSchema.pre("validate", function (next) {
-
     if (!this.resolutionId) {
         const randomSuffix = Math.floor(1000 + Math.random() * 9000);
         this.resolutionId = `RES-${Date.now()}-${randomSuffix}`;
     }
-
     next();
-
 });
-
 
 const resolutionModel = mongoose.model(
     "resolution",
     resolutionSchema
 );
-
 
 module.exports = resolutionModel;

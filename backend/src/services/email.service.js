@@ -1,3 +1,5 @@
+// Handles email transport configuration and sending verification OTP emails via Nodemailer.
+
 const nodemailer = require("nodemailer");
 
 

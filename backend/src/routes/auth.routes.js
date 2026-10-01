@@ -1,3 +1,5 @@
+// Defines API endpoints for authentication, email verification, session management, and role authorization checks.
+
 const express = require("express");
 
 const {

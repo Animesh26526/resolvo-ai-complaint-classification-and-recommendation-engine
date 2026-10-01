@@ -1,8 +1,8 @@
+// Defines the MongoDB schema for system users across Customer, CSE, QAT, and OM roles.
+
 const mongoose = require("mongoose");
 
-
 const userSchema = new mongoose.Schema({
-
     name: {
         type: String,
         required: true,
@@ -31,6 +31,7 @@ const userSchema = new mongoose.Schema({
             "om",
         ],
         default: "customer",
+        index: true,
     },
 
     isEmailVerified: {
@@ -42,11 +43,9 @@ const userSchema = new mongoose.Schema({
     timestamps: true,
 });
 
-
 const userModel = mongoose.model(
     "user",
     userSchema
 );
-
 
 module.exports = userModel;

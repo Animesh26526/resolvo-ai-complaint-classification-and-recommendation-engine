@@ -1,3 +1,5 @@
+// Handles MongoDB database connection lifecycle using Mongoose.
+
 const mongoose = require("mongoose");
 
 

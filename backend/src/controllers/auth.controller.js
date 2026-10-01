@@ -1,3 +1,5 @@
+// Handles user registration, authentication, email verification via OTP, and session profile management.
+
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 

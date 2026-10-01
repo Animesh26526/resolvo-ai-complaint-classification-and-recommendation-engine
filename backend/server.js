@@ -1,3 +1,5 @@
+// Application entry point initializing environment variables, database connection, and HTTP server.
+
 require("dotenv").config();
 
 const app = require("./src/app");

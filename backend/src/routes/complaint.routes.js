@@ -1,3 +1,5 @@
+// Defines API endpoints for complaint lifecycle, staff management, resolution, and SLA tracking.
+
 const express = require("express");
 
 const {
@@ -5,6 +7,7 @@ const {
     getCustomerComplaints,
     getComplaintById,
     getComplaintsForCse,
+    getOverdueComplaints,
     registerComplaintByCse,
     updateComplaintStatus,
     assignComplaint,
@@ -22,11 +25,20 @@ const {
 const router = express.Router();
 
 
-// Staff (CSE) management endpoints
+// Overdue complaints monitoring (CSE, QAT, OM)
+router.get(
+    "/overdue",
+    authenticateUser,
+    authorizeRoles("cse", "qat", "om"),
+    getOverdueComplaints
+);
+
+
+// Staff management endpoints (CSE, QAT, OM can view and filter; CSE registers)
 router.get(
     "/staff",
     authenticateUser,
-    authorizeRoles("cse"),
+    authorizeRoles("cse", "qat", "om"),
     getComplaintsForCse
 );
 

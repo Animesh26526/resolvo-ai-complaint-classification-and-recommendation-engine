@@ -1,3 +1,5 @@
+// Handles JWT authentication verification and role-based access control (RBAC) authorization.
+
 const jwt = require("jsonwebtoken");
 
 const userModel = require("../models/user.model");

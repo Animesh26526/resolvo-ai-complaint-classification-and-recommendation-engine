@@ -1,3 +1,5 @@
+// Handles system health checks for MongoDB database connectivity and AI service availability.
+
 const mongoose = require("mongoose");
 const aiService = require("../services/ai.service");
 

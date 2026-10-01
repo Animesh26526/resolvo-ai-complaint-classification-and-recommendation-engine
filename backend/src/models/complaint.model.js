@@ -1,8 +1,8 @@
+// Defines the MongoDB schema and indexes for customer and CSE complaints.
+
 const mongoose = require("mongoose");
 
-
 const complaintSchema = new mongoose.Schema({
-
     complaintId: {
         type: String,
         required: true,
@@ -24,6 +24,7 @@ const complaintSchema = new mongoose.Schema({
             "Trade",
         ],
         default: null,
+        index: true,
     },
 
     priority: {
@@ -34,6 +35,7 @@ const complaintSchema = new mongoose.Schema({
             "Low",
         ],
         default: null,
+        index: true,
     },
 
     status: {
@@ -49,6 +51,7 @@ const complaintSchema = new mongoose.Schema({
         ],
         default: "Received",
         required: true,
+        index: true,
     },
 
     channel: {
@@ -62,18 +65,21 @@ const complaintSchema = new mongoose.Schema({
         ],
         default: "text",
         required: true,
+        index: true,
     },
 
     customer: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "user",
         required: true,
+        index: true,
     },
 
     assignedTo: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "user",
         default: null,
+        index: true,
     },
 
     sentiment: {
@@ -89,11 +95,13 @@ const complaintSchema = new mongoose.Schema({
     receivedAt: {
         type: Date,
         default: Date.now,
+        index: true,
     },
 
     slaDeadline: {
         type: Date,
         default: null,
+        index: true,
     },
 
     resolvedAt: {
@@ -111,23 +119,21 @@ const complaintSchema = new mongoose.Schema({
     timestamps: true,
 });
 
+// Compound indexes for SLA tracking and filtering
+complaintSchema.index({ status: 1, slaDeadline: 1 });
+complaintSchema.index({ receivedAt: -1, status: 1 });
 
 complaintSchema.pre("validate", function (next) {
-
     if (!this.complaintId) {
         const randomSuffix = Math.floor(1000 + Math.random() * 9000);
         this.complaintId = `CMP-${Date.now()}-${randomSuffix}`;
     }
-
     next();
-
 });
-
 
 const complaintModel = mongoose.model(
     "complaint",
     complaintSchema
 );
-
 
 module.exports = complaintModel;

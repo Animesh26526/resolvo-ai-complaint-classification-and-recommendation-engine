@@ -1,9 +1,12 @@
+// Handles complaint CRUD, lifecycle transitions, AI analysis integration, SLA monitoring, and search/filtering.
+
 const mongoose = require("mongoose");
 
 const complaintModel = require("../models/complaint.model");
 const resolutionModel = require("../models/resolution.model");
 const userModel = require("../models/user.model");
 const aiService = require("../services/ai.service");
+const slaService = require("../services/sla.service");
 
 
 const VALID_CATEGORIES = ["Product", "Packaging", "Trade"];
@@ -97,6 +100,9 @@ async function createComplaint(req, res) {
         });
     }
 
+    const receivedAt = new Date();
+    const slaDeadline = priority ? slaService.calculateSlaDeadline(priority, receivedAt) : null;
+
     const complaint = await complaintModel.create({
         description: description.trim(),
         channel: selectedChannel,
@@ -104,7 +110,8 @@ async function createComplaint(req, res) {
         priority: priority || null,
         status: "Received",
         customer: req.user.id,
-        receivedAt: new Date(),
+        receivedAt: receivedAt,
+        slaDeadline: slaDeadline,
     });
 
     res.status(201).json({
@@ -164,9 +171,15 @@ async function getComplaintById(req, res) {
         });
     }
 
+    const now = new Date();
+    const plainComplaint = typeof complaint.toObject === "function" ? complaint.toObject() : { ...complaint };
+    if (complaint.slaDeadline) {
+        plainComplaint.sla = slaService.getSlaDetails(complaint, now);
+    }
+
     res.status(200).json({
         message: "Complaint fetched successfully",
-        complaint: complaint,
+        complaint: plainComplaint,
     });
 
 }
@@ -180,6 +193,12 @@ async function getComplaintsForCse(req, res) {
         channel,
         priority,
         assignedTo,
+        search,
+        startDate,
+        endDate,
+        isOverdue,
+        page,
+        limit,
     } = req.query;
 
     const filter = {};
@@ -224,6 +243,8 @@ async function getComplaintsForCse(req, res) {
     if (assignedTo) {
         if (assignedTo === "me") {
             filter.assignedTo = req.user.id;
+        } else if (assignedTo === "unassigned") {
+            filter.assignedTo = null;
         } else if (mongoose.Types.ObjectId.isValid(assignedTo)) {
             filter.assignedTo = assignedTo;
         } else {
@@ -233,6 +254,45 @@ async function getComplaintsForCse(req, res) {
         }
     }
 
+    if (startDate || endDate) {
+        filter.receivedAt = {};
+        if (startDate) {
+            const start = new Date(startDate);
+            if (isNaN(start.getTime())) {
+                return res.status(400).json({
+                    message: "Invalid startDate format. Use ISO-8601 (YYYY-MM-DD)",
+                });
+            }
+            filter.receivedAt.$gte = start;
+        }
+        if (endDate) {
+            const end = new Date(endDate);
+            if (isNaN(end.getTime())) {
+                return res.status(400).json({
+                    message: "Invalid endDate format. Use ISO-8601 (YYYY-MM-DD)",
+                });
+            }
+            if (endDate.length <= 10) {
+                end.setUTCHours(23, 59, 59, 999);
+            }
+            filter.receivedAt.$lte = end;
+        }
+    }
+
+    if (isOverdue === "true") {
+        filter.status = { $ne: "Resolved" };
+        filter.slaDeadline = { $ne: null, $lt: new Date() };
+    }
+
+    if (search && search.trim()) {
+        const escaped = search.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        const searchRegex = new RegExp(escaped, "i");
+        filter.$or = [
+            { complaintId: { $regex: searchRegex } },
+            { description: { $regex: searchRegex } },
+        ];
+    }
+
     const complaints = await complaintModel
         .find(filter)
         .populate("customer", "name email role")
@@ -240,10 +300,68 @@ async function getComplaintsForCse(req, res) {
         .populate("resolution")
         .sort({ createdAt: -1 });
 
+    const now = new Date();
+    const complaintsWithSla = complaints.map(c => {
+        const plain = typeof c.toObject === "function" ? c.toObject() : { ...c };
+        plain.sla = slaService.getSlaDetails(c, now);
+        return plain;
+    });
+
+    if (page !== undefined || limit !== undefined) {
+        const pageNum = Math.max(1, parseInt(page, 10) || 1);
+        const limitNum = Math.min(100, Math.max(1, parseInt(limit, 10) || 20));
+        const total = complaintsWithSla.length;
+        const totalPages = Math.ceil(total / limitNum) || 1;
+        const startIndex = (pageNum - 1) * limitNum;
+        const paginated = complaintsWithSla.slice(startIndex, startIndex + limitNum);
+
+        return res.status(200).json({
+            message: "Complaints fetched successfully",
+            count: paginated.length,
+            complaints: paginated,
+            data: paginated,
+            page: pageNum,
+            limit: limitNum,
+            total,
+            totalPages,
+        });
+    }
+
     res.status(200).json({
         message: "Complaints fetched successfully",
-        count: complaints.length,
-        complaints: complaints,
+        count: complaintsWithSla.length,
+        complaints: complaintsWithSla,
+        data: complaintsWithSla,
+    });
+
+}
+
+
+async function getOverdueComplaints(req, res) {
+
+    const now = new Date();
+    const complaints = await complaintModel
+        .find({
+            status: { $ne: "Resolved" },
+            slaDeadline: { $ne: null, $lt: now },
+        })
+        .populate("customer", "name email role")
+        .populate("assignedTo", "name email role")
+        .populate("resolution")
+        .sort({ slaDeadline: 1 });
+
+    const overdueList = complaints
+        .filter(c => slaService.isComplaintOverdue(c, now))
+        .map(c => {
+            const plain = typeof c.toObject === "function" ? c.toObject() : { ...c };
+            plain.sla = slaService.getSlaDetails(c, now);
+            return plain;
+        });
+
+    res.status(200).json({
+        message: "Overdue complaints fetched successfully",
+        count: overdueList.length,
+        complaints: overdueList,
     });
 
 }
@@ -320,6 +438,9 @@ async function registerComplaintByCse(req, res) {
         });
     }
 
+    const receivedAt = new Date();
+    const slaDeadline = priority ? slaService.calculateSlaDeadline(priority, receivedAt) : null;
+
     const complaint = await complaintModel.create({
         description: description.trim(),
         channel: selectedChannel,
@@ -328,7 +449,8 @@ async function registerComplaintByCse(req, res) {
         status: "Registered",
         customer: targetCustomerId,
         assignedTo: req.user.id,
-        receivedAt: new Date(),
+        receivedAt: receivedAt,
+        slaDeadline: slaDeadline,
     });
 
     const populatedComplaint = await complaintModel
@@ -550,6 +672,10 @@ async function analyzeComplaint(req, res) {
     complaint.sentiment = aiResult.sentiment;
     complaint.priority = aiResult.priority;
     complaint.aiRecommendation = aiResult.recommendation;
+
+    if (aiResult.priority && !complaint.slaDeadline) {
+        complaint.slaDeadline = slaService.calculateSlaDeadline(aiResult.priority, complaint.receivedAt);
+    }
 
     let resolution = await resolutionModel.findOne({ complaint: complaint._id });
 
@@ -794,6 +920,7 @@ module.exports = {
     getCustomerComplaints,
     getComplaintById,
     getComplaintsForCse,
+    getOverdueComplaints,
     registerComplaintByCse,
     updateComplaintStatus,
     assignComplaint,

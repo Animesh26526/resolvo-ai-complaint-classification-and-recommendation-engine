@@ -1,3 +1,5 @@
+// Handles 404 route not found fallbacks and centralized error handling for the Express application.
+
 function notFoundHandler(req, res, next) {
 
     res.status(404).json({

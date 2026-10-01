@@ -1,3 +1,5 @@
+// Defines the MongoDB schema and TTL expiration index for email verification OTP codes.
+
 const mongoose = require("mongoose");
 
 
