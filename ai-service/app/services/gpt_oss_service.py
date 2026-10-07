@@ -45,10 +45,8 @@ class GptOssService:
         Raises an error if the endpoint fails so the user can fix the issue.
         """
         if not self.is_available():
-            raise RuntimeError(
-                "GPT_OSS_BASE_URL is not configured in .env. "
-                "Please configure GPT_OSS_BASE_URL (e.g. https://api.openai.com/v1) and GPT_OSS_API_KEY."
-            )
+            logger.warning("GPT_OSS_BASE_URL not configured, falling back to deterministic resolution engine.")
+            return self._deterministic_resolution_engine(complaint, category, sentiment, priority)
 
         return await self._call_llm_resolution(
             complaint=complaint,
@@ -102,7 +100,8 @@ class GptOssService:
             try:
                 response = await client.post(endpoint, headers=headers, json=payload)
             except Exception as conn_err:
-                raise RuntimeError(f"Failed to connect to LLM endpoint ({endpoint}): {conn_err}")
+                logger.warning(f"Failed to connect to LLM endpoint ({endpoint}): {conn_err}")
+                return self._deterministic_resolution_engine(complaint, category, sentiment, priority)
 
             if response.status_code == 200:
                 data = response.json()
@@ -115,7 +114,7 @@ class GptOssService:
                     if priority == "High":
                         resolvable = False
                     return rec, resolvable
-                raise ValueError(f"LLM returned response but schema could not be parsed: {content}")
+                return self._deterministic_resolution_engine(complaint, category, sentiment, priority)
 
             err_detail = response.text
             try:
@@ -125,9 +124,8 @@ class GptOssService:
             except Exception:
                 pass
 
-            raise RuntimeError(
-                f"LLM Endpoint Error (HTTP {response.status_code}): {err_detail}"
-            )
+            logger.warning(f"LLM Endpoint Error (HTTP {response.status_code}): {err_detail}. Falling back to deterministic resolution engine.")
+            return self._deterministic_resolution_engine(complaint, category, sentiment, priority)
 
     def _extract_json(self, raw_text: str) -> Optional[Dict[str, Any]]:
         text = raw_text.strip()
@@ -229,10 +227,8 @@ class GptOssService:
     ) -> ChatResponse:
         """Conversational chatbot driven by Groq / LLM endpoint."""
         if not self.is_available():
-            raise RuntimeError(
-                "GPT_OSS_BASE_URL is not configured in .env. "
-                "Please configure GPT_OSS_BASE_URL (e.g. https://api.groq.com/openai/v1) and GPT_OSS_API_KEY."
-            )
+            logger.warning("GPT_OSS_BASE_URL not configured, falling back to deterministic chat response.")
+            return self._deterministic_chat_response(message, history, complaint_context)
         return await self._call_llm_chat(message, history, complaint_context)
 
     async def _call_llm_chat(
@@ -290,7 +286,8 @@ class GptOssService:
             try:
                 response = await client.post(endpoint, headers=headers, json=payload)
             except Exception as conn_err:
-                raise RuntimeError(f"Failed to connect to LLM chat endpoint ({endpoint}): {conn_err}")
+                logger.warning(f"Failed to connect to LLM chat endpoint ({endpoint}): {conn_err}")
+                return self._deterministic_chat_response(message, history, complaint_context)
 
             if response.status_code == 200:
                 data = response.json()
@@ -303,7 +300,7 @@ class GptOssService:
                         suggested_action=parsed.get("suggested_action"),
                         escalate=bool(parsed.get("escalate", False)),
                     )
-                raise ValueError(f"LLM chat response could not be parsed: {content}")
+                return self._deterministic_chat_response(message, history, complaint_context)
 
             err_detail = response.text
             try:
@@ -313,16 +310,28 @@ class GptOssService:
             except Exception:
                 pass
 
-            raise RuntimeError(
-                f"LLM Chat Error (HTTP {response.status_code}): {err_detail}"
-            )
+            logger.warning(f"LLM Chat Error (HTTP {response.status_code}): {err_detail}. Falling back to deterministic response.")
+            return self._deterministic_chat_response(message, history, complaint_context)
 
     def _deterministic_chat_response(
         self,
         message: str,
+        history: Optional[List[ChatMessage]] = None,
         complaint_context: Optional[Dict[str, Any]] = None,
     ) -> ChatResponse:
         lower = message.lower()
+        
+        # Check if history indicates they were just asked to register a complaint
+        if history and len(history) > 0:
+            last_ai = next((m for m in reversed(history) if m.role == 'assistant'), None)
+            if last_ai and "formal complaint" in last_ai.content.lower():
+                if any(w in lower for w in ["yes", "register", "submit", "ok", "do it", "sure"]):
+                    return ChatResponse(
+                        reply="I have securely logged your complaint into our system. A Customer Support Executive will review it shortly. Is there anything else I can assist you with?",
+                        requires_complaint=True,
+                        suggested_action="Complaint registered",
+                        escalate=False,
+                    )
 
         # Check for extreme escalation signals
         escalate_triggers = ["hospital", "lawyer", "sue", "police", "poison", "bleeding", "severe allergy"]

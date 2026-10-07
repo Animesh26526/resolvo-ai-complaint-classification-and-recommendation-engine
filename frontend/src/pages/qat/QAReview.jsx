@@ -18,7 +18,7 @@ export default function QAReview() {
       try {
         const [compRes, revRes] = await Promise.all([
           api.get(`/complaints/${id}`),
-          api.get(`/qat/${id}/review`).catch(() => null)
+          api.get(`/qa/${id}/review`).catch(() => null)
         ]);
         
         setComplaint(compRes.data.complaint);
@@ -27,7 +27,7 @@ export default function QAReview() {
           setReview(revData);
           setCorrectedCategory(revData.correctedCategory || '');
           setCorrectedPriority(revData.correctedPriority || '');
-          setComments(revData.comments || '');
+          setComments(revData.reviewRemarks || '');
         } else {
           // prefill with AI values if no review exists
           setCorrectedCategory(compRes.data.complaint.category || '');
@@ -42,15 +42,24 @@ export default function QAReview() {
     fetchData();
   }, [id]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (e, resultType) => {
+    e?.preventDefault();
     try {
-      await api.post(`/qat/${id}/review`, {
-        correctedCategory,
-        correctedPriority,
-        comments
+      await api.post(`/qa/${id}/review`, {
+        classificationResult: resultType,
+        correctedCategory: resultType === 'Corrected' ? correctedCategory : undefined,
+        correctedPriority: resultType === 'Corrected' ? correctedPriority : undefined,
+        reviewRemarks: comments
       });
-      alert('QA Review submitted successfully.');
+      // Simulate sending feedback to ML model
+      try {
+        await fetch('http://127.0.0.1:8000/api/feedback', {
+           method: 'POST',
+           headers: {'Content-Type':'application/json'},
+           body: JSON.stringify({ complaint_id: id, result: resultType, category: correctedCategory, priority: correctedPriority })
+        });
+      } catch(e) {}
+      alert(`QA Review (${resultType}) submitted successfully.`);
       navigate(`/complaint/${id}`);
     } catch (err) {
       alert('Failed to submit QA Review.');
@@ -89,8 +98,8 @@ export default function QAReview() {
         </div>
 
         <div className="bg-white p-5 border border-slate-200 rounded-xl shadow-sm border-t-4 border-t-emerald-500">
-          <h3 className="font-semibold mb-3">QA Correction</h3>
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <h3 className="font-semibold mb-3">QA Correction & Feedback</h3>
+          <form className="flex flex-col gap-4">
             <div className="flex flex-col gap-1 text-sm">
               <label className="font-medium text-slate-700">Corrected Category</label>
               <select 
@@ -101,9 +110,7 @@ export default function QAReview() {
                 <option value="">Select Category</option>
                 <option value="Product">Product</option>
                 <option value="Packaging">Packaging</option>
-                <option value="Logistics">Logistics</option>
-                <option value="Service">Service</option>
-                <option value="Other">Other</option>
+                <option value="Trade">Trade</option>
               </select>
             </div>
             
@@ -121,19 +128,32 @@ export default function QAReview() {
             </div>
 
             <div className="flex flex-col gap-1 text-sm">
-              <label className="font-medium text-slate-700">QA Comments</label>
+              <label className="font-medium text-slate-700">Review Remarks</label>
               <textarea 
                 value={comments} 
                 onChange={e => setComments(e.target.value)}
-                placeholder="Reason for correction..."
+                placeholder="Reason for correction or additional notes for ML training..."
                 className="w-full p-2 border border-slate-200 rounded bg-slate-50"
                 rows={3}
               />
             </div>
             
-            <button type="submit" className="mt-2 py-2 bg-slate-900 text-white font-medium rounded hover:bg-slate-800">
-              {review ? 'Update Review' : 'Submit Review'}
-            </button>
+            <div className="flex gap-4 mt-2">
+              <button 
+                type="button"
+                onClick={(e) => handleSubmit(e, 'Agreed')}
+                className="flex-1 py-2 bg-emerald-100 text-emerald-700 font-medium rounded hover:bg-emerald-200"
+              >
+                Mark as Correct (Agreed)
+              </button>
+              <button 
+                type="button"
+                onClick={(e) => handleSubmit(e, 'Corrected')}
+                className="flex-1 py-2 bg-blue-600 text-white font-medium rounded hover:bg-blue-700"
+              >
+                Submit Correction
+              </button>
+            </div>
           </form>
         </div>
       </div>

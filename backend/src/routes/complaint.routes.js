@@ -45,21 +45,21 @@ router.get(
 router.post(
     "/staff",
     authenticateUser,
-    authorizeRoles("cse"),
+    authorizeRoles("cse", "qat", "om"),
     registerComplaintByCse
 );
 
-router.patch(
-    "/:id/status",
+router.post(
+    "/:id/stage",
     authenticateUser,
-    authorizeRoles("cse"),
+    authorizeRoles("cse", "qat", "om"),
     updateComplaintStatus
 );
 
 router.patch(
     "/:id/assign",
     authenticateUser,
-    authorizeRoles("cse"),
+    authorizeRoles("cse", "qat", "om"),
     assignComplaint
 );
 
@@ -75,14 +75,14 @@ router.get(
 router.post(
     "/:id/resolution",
     authenticateUser,
-    authorizeRoles("cse"),
+    authorizeRoles("cse", "qat", "om"),
     updateComplaintResolution
 );
 
 router.put(
     "/:id/resolution",
     authenticateUser,
-    authorizeRoles("cse"),
+    authorizeRoles("cse", "qat", "om"),
     updateComplaintResolution
 );
 
@@ -91,7 +91,7 @@ router.put(
 router.post(
     "/:id/analyze",
     authenticateUser,
-    authorizeRoles("customer", "cse", "qat"),
+    authorizeRoles("customer", "cse", "qat", "om"),
     analyzeComplaint
 );
 
@@ -100,7 +100,7 @@ router.post(
 router.post(
     "/:id/register",
     authenticateUser,
-    authorizeRoles("customer", "cse"),
+    authorizeRoles("customer", "cse", "qat", "om"),
     registerFormalComplaint
 );
 

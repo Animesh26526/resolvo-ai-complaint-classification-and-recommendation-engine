@@ -24,7 +24,7 @@ export default function ProtectedRoute({ allowedRoles }) {
   if (allowedRoles && !allowedRoles.includes(user.role)) {
     // Redirect based on role if they try to access unauthorized pages
     switch (user.role) {
-      case 'customer': return <Navigate to="/customer/complaints" replace />;
+      case 'customer': return <Navigate to="/customer/submit" replace />;
       case 'cse': return <Navigate to="/cse/dashboard" replace />;
       case 'qat': return <Navigate to="/qat/dashboard" replace />;
       case 'om': return <Navigate to="/om/dashboard" replace />;

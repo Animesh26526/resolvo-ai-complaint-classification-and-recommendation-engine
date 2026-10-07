@@ -41,24 +41,13 @@ export default function Header() {
 
         {/* Header Actions / User */}
         <div className="flex items-center gap-3">
-          {/* Heartbeat */}
-          <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 font-mono text-[11px] font-medium">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span>Heartbeat: 99.9%</span>
-          </div>
 
           {/* Time */}
           <div className="hidden md:flex items-center gap-1.5 text-slate-600 px-2.5 py-1 bg-slate-50 border border-slate-200 rounded-md">
             <span className="material-symbols-outlined text-[14px] text-slate-400">schedule</span>
             <span className="font-mono text-xs font-medium text-slate-700">{time}</span>
           </div>
-
-          {/* Notification */}
-          <button aria-label="Notifications" className="relative p-1.5 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors">
-            <span className="material-symbols-outlined text-[20px]">notifications</span>
-            <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-rose-500 ring-2 ring-white"></span>
-          </button>
-
+          
           {/* Profile */}
           <div className="flex items-center gap-2 pl-2 border-l border-slate-200 relative group">
             <div className="flex items-center gap-2.5 cursor-pointer py-1 px-1.5 rounded-lg hover:bg-slate-100/70 transition-colors">

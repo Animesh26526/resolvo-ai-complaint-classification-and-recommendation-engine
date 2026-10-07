@@ -24,14 +24,14 @@ export default function ComplaintDetail() {
       const res = await api.get(`/complaints/${id}`);
       const comp = res.data.complaint || res.data.data?.complaint;
       setComplaint(comp);
-      if (comp?.resolution) {
-        setResolutionText(comp.resolution.recommendedAction || '');
+      if (comp?.resolution || comp?.aiRecommendation) {
+        setResolutionText(comp.resolution?.recommendation || comp.aiRecommendation || '');
       }
       
       // Fetch QA Review if staff
       if (user?.role !== 'customer') {
         try {
-          const qaRes = await api.get(`/qat/${id}/review`);
+          const qaRes = await api.get(`/qa/${id}/review`);
           if (qaRes.data) {
             setQaReview(qaRes.data.review || qaRes.data.data || qaRes.data);
           }
@@ -50,14 +50,24 @@ export default function ComplaintDetail() {
     fetchComplaint();
   }, [id]);
 
-  const handleUpdateStatus = async (newStatus) => {
-    if (!window.confirm(`Are you sure you want to mark this complaint as ${newStatus}?`)) return;
+  const [confirmDialog, setConfirmDialog] = useState({ isOpen: false, status: null });
+
+  const confirmUpdateStatus = (newStatus) => {
+    setConfirmDialog({ isOpen: true, status: newStatus });
+  };
+
+  const executeUpdateStatus = async () => {
+    const newStatus = confirmDialog.status;
+    setConfirmDialog({ isOpen: false, status: null });
+    if (!newStatus) return;
+
     setIsUpdatingStatus(true);
     try {
-      await api.patch(`/complaints/${id}/status`, { status: newStatus });
+      const res = await api.post(`/complaints/${id}/stage`, { status: newStatus });
+      alert(res.data.message || `Status updated to ${newStatus}`);
       fetchComplaint();
     } catch (err) {
-      alert('Failed to update status.');
+      alert(`Failed to update status: ${err.response?.data?.message || err.message}`);
     } finally {
       setIsUpdatingStatus(false);
     }
@@ -66,10 +76,11 @@ export default function ComplaintDetail() {
   const handleAIAnalysis = async () => {
     setIsGenerating(true);
     try {
-      await api.post(`/complaints/${id}/analyze`);
+      const res = await api.post(`/complaints/${id}/analyze`);
+      alert(res.data.message || 'AI Analysis completed successfully!');
       fetchComplaint();
     } catch (err) {
-      alert('AI Analysis failed.');
+      alert(`AI Analysis failed: ${err.response?.data?.message || err.message}`);
     } finally {
       setIsGenerating(false);
     }
@@ -79,13 +90,14 @@ export default function ComplaintDetail() {
     if (!resolutionText.trim()) return;
     try {
       await api.post(`/complaints/${id}/resolution`, {
-        action: resolutionText,
+        actionTaken: resolutionText,
+        remarks: "Manually updated by staff",
         resolvedByAI: false
       });
       alert('Resolution updated successfully.');
       fetchComplaint();
     } catch (err) {
-      alert('Failed to save resolution.');
+      alert(`Failed to save resolution: ${err.response?.data?.message || err.message}`);
     }
   };
 
@@ -146,14 +158,14 @@ export default function ComplaintDetail() {
           </div>
 
           {/* AI Analysis Card */}
-          {(user.role !== 'customer' || complaint.aiAnalyzed) && (
+          {(user.role !== 'customer' || complaint.category) && (
             <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold text-slate-800 flex items-center gap-2">
                   <span className="material-symbols-outlined text-emerald-600 text-[18px]">smart_toy</span>
                   AI Analysis Context
                 </h3>
-                {user.role !== 'customer' && !complaint.aiAnalyzed && (
+                {user.role !== 'customer' && !complaint.category && (
                   <button 
                     onClick={handleAIAnalysis}
                     disabled={isGenerating}
@@ -164,7 +176,7 @@ export default function ComplaintDetail() {
                 )}
               </div>
               
-              {complaint.aiAnalyzed ? (
+              {complaint.category || complaint.aiRecommendation ? (
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                   <div className="p-3 bg-slate-50 rounded-lg border border-slate-100 flex flex-col gap-1">
                     <span className="text-xs text-slate-500 font-medium uppercase tracking-wider">Priority</span>
@@ -201,7 +213,7 @@ export default function ComplaintDetail() {
             
             {user.role === 'customer' ? (
               <div className="bg-slate-50 p-4 rounded-lg border border-slate-100">
-                {complaint.resolution?.recommendedAction || 'No resolution provided yet. Our team is working on it.'}
+                {complaint.resolution?.recommendation || complaint.aiRecommendation || 'No resolution provided yet. Our team is working on it.'}
               </div>
             ) : (
               <div className="flex flex-col gap-3">
@@ -232,7 +244,7 @@ export default function ComplaintDetail() {
               <div className="bg-slate-50 p-4 rounded-lg border border-slate-100 flex flex-col gap-2 text-sm">
                 <p><span className="font-medium text-slate-700">Corrected Category:</span> {qaReview.correctedCategory || 'None'}</p>
                 <p><span className="font-medium text-slate-700">Corrected Priority:</span> {qaReview.correctedPriority || 'None'}</p>
-                <p><span className="font-medium text-slate-700">Comments:</span> {qaReview.comments}</p>
+                <p><span className="font-medium text-slate-700">Comments:</span> {qaReview.reviewRemarks}</p>
                 <p className="text-xs text-slate-500 mt-2">Reviewed on {format(new Date(qaReview.createdAt), 'MMM dd, yyyy')}</p>
               </div>
             </div>
@@ -274,18 +286,18 @@ export default function ComplaintDetail() {
             <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm flex flex-col gap-3">
               <h3 className="font-semibold text-slate-800 mb-2">Actions</h3>
               
-              {complaint.status !== 'In Progress' && (
+              {complaint.status !== 'Under Consideration' && (
                 <button 
-                  onClick={() => handleUpdateStatus('In Progress')}
+                  onClick={() => confirmUpdateStatus('Under Consideration')}
                   className="w-full py-2 bg-amber-50 text-amber-700 font-medium text-sm rounded-lg border border-amber-200 hover:bg-amber-100"
                 >
-                  Mark In Progress
+                  Mark Under Consideration
                 </button>
               )}
               
               {complaint.status !== 'Resolved' && (
                 <button 
-                  onClick={() => handleUpdateStatus('Resolved')}
+                  onClick={() => confirmUpdateStatus('Resolved')}
                   className="w-full py-2 bg-emerald-50 text-emerald-700 font-medium text-sm rounded-lg border border-emerald-200 hover:bg-emerald-100"
                 >
                   Mark Resolved
@@ -305,6 +317,30 @@ export default function ComplaintDetail() {
         </div>
 
       </div>
+
+      {/* Confirmation Modal */}
+      {confirmDialog.isOpen && (
+        <div className="fixed inset-0 bg-slate-900/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 max-w-sm w-full shadow-2xl">
+            <h3 className="text-lg font-bold mb-2 text-slate-800">Confirm Action</h3>
+            <p className="text-slate-600 mb-6">Are you sure you want to mark this complaint as <strong>{confirmDialog.status}</strong>?</p>
+            <div className="flex justify-end gap-3">
+              <button 
+                onClick={() => setConfirmDialog({ isOpen: false, status: null })}
+                className="px-4 py-2 border border-slate-200 rounded-lg text-slate-700 hover:bg-slate-50 font-medium"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={executeUpdateStatus}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

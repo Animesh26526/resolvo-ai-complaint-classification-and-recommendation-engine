@@ -46,8 +46,6 @@ class ComplaintAnalyzerService:
             raise ValueError("Complaint description cannot be empty")
 
         clean_text = description.strip()
-        if len(clean_text) < 3:
-            raise ValueError("Complaint description must contain at least 3 non-whitespace characters")
 
         # Step 1: Hugging Face Sentiment Analysis
         sentiment_res: SentimentResult = self.sentiment_service.analyze_sentiment(clean_text)

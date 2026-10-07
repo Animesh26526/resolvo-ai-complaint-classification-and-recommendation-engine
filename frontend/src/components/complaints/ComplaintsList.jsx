@@ -33,7 +33,16 @@ export default function ComplaintsList({ apiEndpoint, title, subtitle }) {
       };
       const res = await api.get(apiEndpoint, { params });
       
-      setComplaints(res.data.complaints || res.data.data || []);
+      let fetchedData = res.data.complaints || res.data.data || [];
+      if (res.data.reviews) {
+        // If the endpoint returned QA reviews, extract the populated complaint objects
+        fetchedData = res.data.reviews.map(r => ({
+          ...r.complaint,
+          _qaReviewId: r._id,
+          classificationResult: r.classificationResult
+        }));
+      }
+      setComplaints(fetchedData);
       setTotalPages(res.data.pagination?.totalPages || res.data.totalPages || 1);
       setTotalRecords(res.data.pagination?.total || res.data.total || res.data.count || 0);
       setError(null);
@@ -64,10 +73,14 @@ export default function ComplaintsList({ apiEndpoint, title, subtitle }) {
 
   const getStatusColor = (stat) => {
     switch(stat) {
-      case 'Open': return 'bg-rose-50 text-rose-700';
-      case 'In Progress': return 'bg-amber-50 text-amber-700';
+      case 'Received':
+      case 'Analyzed':
+      case 'Registered': return 'bg-slate-100 text-slate-600';
+      case 'Assigned': return 'bg-blue-50 text-blue-700';
+      case 'In Progress':
+      case 'Under Consideration': return 'bg-amber-50 text-amber-700';
+      case 'Escalated': return 'bg-rose-50 text-rose-700';
       case 'Resolved': return 'bg-emerald-50 text-emerald-700';
-      case 'Closed': return 'bg-slate-100 text-slate-500';
       default: return 'bg-slate-100 text-slate-700';
     }
   };
@@ -106,10 +119,14 @@ export default function ComplaintsList({ apiEndpoint, title, subtitle }) {
               className="appearance-none bg-slate-50 border border-slate-200 text-slate-900 px-3 py-1.5 pr-8 rounded-lg text-sm focus:outline-none focus:border-slate-400 cursor-pointer"
             >
               <option value="">All Statuses</option>
-              <option value="Open">Open</option>
+              <option value="Received">Received</option>
+              <option value="Analyzed">Analyzed</option>
+              <option value="Registered">Registered</option>
+              <option value="Assigned">Assigned</option>
               <option value="In Progress">In Progress</option>
+              <option value="Under Consideration">Under Consideration</option>
+              <option value="Escalated">Escalated</option>
               <option value="Resolved">Resolved</option>
-              <option value="Closed">Closed</option>
             </select>
           </div>
 
@@ -172,17 +189,17 @@ export default function ComplaintsList({ apiEndpoint, title, subtitle }) {
                   <td colSpan="7" className="py-8 text-center text-slate-500 font-medium">No complaints found.</td>
                 </tr>
               ) : (
-                complaints.map(c => (
-                  <tr key={c._id} className="hover:bg-slate-50/60 transition-colors">
+                complaints.map((c, i) => (
+                  <tr key={c._id || c._qaReviewId || i} className="hover:bg-slate-50/60 transition-colors">
                     <td className="py-4 px-4 pl-5">
                       <span className="px-2 py-0.5 bg-slate-100 text-slate-900 font-mono text-xs font-semibold rounded">
-                        #{c._id.substring(c._id.length - 6).toUpperCase()}
+                        #{c.complaintId || (c._id ? c._id.substring(Math.max(0, c._id.length - 6)).toUpperCase() : 'UNKNOWN')}
                       </span>
                     </td>
                     <td className="py-4 px-3">
                       <div className="flex flex-col">
-                        <Link to={`/complaint/${c._id}`} className="font-semibold text-slate-900 hover:text-emerald-600 transition-colors">
-                          {c.description.length > 50 ? c.description.substring(0, 50) + '...' : c.description}
+                        <Link to={`/complaint/${c._id || c._qaReviewId}`} className="font-semibold text-slate-900 hover:text-emerald-600 transition-colors">
+                          {c.description ? (c.description.length > 50 ? c.description.substring(0, 50) + '...' : c.description) : 'No Description Available'}
                         </Link>
                         <span className="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
                           <span>{c.category || 'Uncategorized'}</span>
@@ -205,7 +222,7 @@ export default function ComplaintsList({ apiEndpoint, title, subtitle }) {
                       )}
                     </td>
                     <td className="py-4 px-3 text-slate-500 text-xs">
-                      {format(new Date(c.createdAt), 'MMM dd, HH:mm')}
+                      {c.createdAt ? format(new Date(c.createdAt), 'MMM dd, HH:mm') : 'Unknown Date'}
                     </td>
                     {user?.role !== 'customer' && (
                       <td className="py-4 px-3">

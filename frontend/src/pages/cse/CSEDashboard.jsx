@@ -16,7 +16,7 @@ export default function CSEDashboard() {
         const cases = res.data.complaints || res.data.data || [];
         setStats({
           total: cases.length,
-          open: cases.filter(c => c.status === 'Open' || c.status === 'In Progress' || c.status === 'Assigned').length,
+          open: cases.filter(c => ['Received', 'Analyzed', 'Registered', 'Assigned', 'In Progress', 'Under Consideration', 'Escalated'].includes(c.status)).length,
           resolved: cases.filter(c => c.status === 'Resolved').length,
           overdue: cases.filter(c => c.isOverdue).length
         });

@@ -109,13 +109,7 @@ export default function Login() {
               </button>
             </div>
             
-            <div className="mt-6 border-t border-slate-200 pt-6">
-              <div className="text-xs text-center text-slate-500">
-                Demo Accounts:<br/>
-                customer@resolvo.com | cse1@resolvo.com<br/>
-                qat@resolvo.com | om@resolvo.com
-              </div>
-            </div>
+           
           </form>
         </div>
       </div>

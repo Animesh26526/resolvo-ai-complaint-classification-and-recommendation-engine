@@ -10,8 +10,8 @@ const VALID_CATEGORIES = ["Product", "Packaging", "Trade"];
 const VALID_PRIORITIES = ["High", "Medium", "Low"];
 
 async function createQaReview(req, res) {
+    const complaintId = req.params.id || req.body.complaintId;
     const {
-        complaintId,
         classificationResult,
         reviewRemarks,
         correctedCategory,
@@ -193,10 +193,17 @@ async function getQaReviewById(req, res) {
     const { id } = req.params;
 
     const isMongoId = mongoose.Types.ObjectId.isValid(id);
-    const query = isMongoId ? { _id: id } : { reviewId: id };
+    let complaintId = id;
+    
+    // If it's a string like CMP-1234, find the complaint's ObjectId first
+    if (!isMongoId) {
+        const complaint = await complaintModel.findOne({ complaintId: id });
+        if (!complaint) return res.status(404).json({ message: "Complaint not found" });
+        complaintId = complaint._id;
+    }
 
     const review = await qaReviewModel
-        .findOne(query)
+        .findOne({ complaint: complaintId })
         .populate("reviewer", "name email role")
         .populate("complaint");
 

@@ -2,6 +2,7 @@ import React from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Header from './Header';
+import SahayakAI from './SahayakAI';
 
 // Main layout wrapper for authenticated sections, containing the sidebar and header.
 export default function AppLayout() {
@@ -14,6 +15,7 @@ export default function AppLayout() {
           <Outlet />
         </main>
       </div>
+      <SahayakAI />
     </div>
   );
 }

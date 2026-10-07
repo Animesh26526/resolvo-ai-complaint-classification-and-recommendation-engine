@@ -51,4 +51,19 @@ router.get(
     getQaReviewById
 );
 
+// Frontend expects these routes for QA Reviews:
+router.post(
+    "/:id/review",
+    authenticateUser,
+    authorizeRoles("qat", "om"),
+    createQaReview
+);
+
+router.get(
+    "/:id/review",
+    authenticateUser,
+    authorizeRoles("qat", "om"),
+    getQaReviewById
+);
+
 module.exports = router;

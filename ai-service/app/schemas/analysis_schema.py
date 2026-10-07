@@ -5,7 +5,6 @@ from pydantic import BaseModel, Field, field_validator
 class AnalyzeComplaintRequest(BaseModel):
     description: str = Field(
         ...,
-        min_length=3,
         description="Detailed complaint narrative or customer statement",
         example="The organic wellness lotion container was cracked upon arrival and had leaked into the packaging.",
     )
@@ -14,14 +13,6 @@ class AnalyzeComplaintRequest(BaseModel):
         description="Intake channel: text, email, call, chatbot, or direct",
         example="text",
     )
-
-    @field_validator("description")
-    @classmethod
-    def validate_description(cls, v: str) -> str:
-        if not v or not v.strip() or len(v.strip()) < 3:
-            raise ValueError("Complaint description must contain at least 3 non-whitespace characters")
-        return v.strip()
-
 
 class AnalyzeComplaintResponse(BaseModel):
     category: Literal["Product", "Packaging", "Trade"]

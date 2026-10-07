@@ -32,8 +32,8 @@ export default function Sidebar() {
         ];
       case 'customer':
         return [
-          { name: 'My Complaints', path: '/customer/complaints', icon: 'inbox' },
           { name: 'Submit Complaint', path: '/customer/submit', icon: 'post_add' },
+          { name: 'My Complaints', path: '/customer/complaints', icon: 'inbox' },
         ];
       default:
         return [];
@@ -46,7 +46,7 @@ export default function Sidebar() {
     'om': 'Operations Manager',
     'qat': 'QA Team',
     'cse': 'Customer Support',
-    'customer': 'customer'
+    'customer': 'Customer'
   };
 
   return (
@@ -60,7 +60,6 @@ export default function Sidebar() {
             </div>
             <span className="font-semibold text-slate-900 text-[15px] tracking-tight">Resolvo</span>
           </div>
-          <span className="px-1.5 py-0.5 bg-slate-200/60 text-slate-600 font-mono text-[10px] font-medium rounded">v2.4</span>
         </div>
 
         {/* Current Role Pill */}
@@ -107,16 +106,7 @@ export default function Sidebar() {
         </nav>
       </div>
 
-      {/* Bottom Sidebar Status */}
-      <div className="p-4 border-t border-slate-200/80">
-        <div className="px-3 py-2 bg-white border border-slate-200 rounded-lg flex items-center justify-between shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
-          <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-slate-400 text-[17px]">shield</span>
-            <span className="text-xs text-slate-600 font-medium">System Status</span>
-          </div>
-          <span className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 font-medium uppercase">Online</span>
-        </div>
-      </div>
+      
     </aside>
   );
 }

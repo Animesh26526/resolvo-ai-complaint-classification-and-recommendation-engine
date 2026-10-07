@@ -1,10 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MessageSquare, Mail, Users, Send, AlertTriangle, Bot, CheckCircle, Activity, Save, Mic, MicOff, Sparkles } from 'lucide-react';
+import { MessageSquare, Mail, Users, Send, AlertTriangle, Bot, CheckCircle, Activity, Save, Mic, MicOff, Sparkles, FileText } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
-import AgenticMode from '../../components/complaints/AgenticMode';
 import LiveD2DSession from '../../components/complaints/LiveD2DSession';
 
 export default function SubmitComplaint() {
@@ -32,7 +31,7 @@ export default function SubmitComplaint() {
     try {
       const response = await api.post(user?.role === 'cse' ? '/complaints/staff' : '/complaints', {
         description: directDesc,
-        channel: 'Direct'
+        channel: 'text'
       });
       const c = response.data.complaint;
       setSessionComplaint(c);
@@ -72,7 +71,7 @@ export default function SubmitComplaint() {
       });
       const chatRes = await res.json();
       setChatMessages(prev => [...prev, { 
-        role: 'assistant', content: chatRes.response || 'Noted.', isEscalated: false, isResolved: false
+        role: 'assistant', content: chatRes.reply || 'Noted.', isEscalated: false, isResolved: false
       }]);
     } catch(e) {
       setChatMessages(prev => [...prev, { role: 'assistant', content: 'System error' }]);
@@ -117,12 +116,18 @@ export default function SubmitComplaint() {
   const handleEmailSubmit = async () => {
     if (!emailBody.trim()) return;
     try {
-      const response = await api.post(user?.role === 'cse' ? '/complaints/staff' : '/complaints', {
+      const endpoint = user?.role === 'cse' ? '/complaints/staff' : '/complaints';
+      const response = await api.post(endpoint, {
         description: `Subject: ${emailSubject}\nBody: ${emailBody}\nDraft: ${emailDraft}`,
-        channel: 'Email'
+        channel: 'email'
       });
-      alert(`Complaint logged successfully: ${response.data.complaint._id}`);
-      navigate('/customer/complaints');
+      
+      const compId = response.data.complaint.complaintId || response.data.complaint._id;
+      const mailto = `mailto:cse@resolvo.com?subject=Complaint [${compId}]: ${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailDraft || emailBody)}`;
+      window.location.href = mailto;
+
+      alert(`Complaint logged successfully. Opening your email client to send to CSE.`);
+      navigate(user?.role === 'cse' ? '/cse/dashboard' : '/customer/complaints');
     } catch (e) {
       alert('Failed to log email complaint.');
     }
@@ -180,10 +185,10 @@ export default function SubmitComplaint() {
     try {
       const response = await api.post(user?.role === 'cse' ? '/complaints/staff' : '/complaints', {
         description: `TRANSCRIPT: ${liveTranscript}`,
-        channel: 'Direct'
+        channel: 'text'
       });
       alert(`Complaint Registered! ID: ${response.data.complaint._id}`);
-      navigate('/customer/complaints');
+      navigate(user?.role === 'cse' ? '/cse/dashboard' : '/customer/complaints');
     } catch (e) {
       alert('Registration failed.');
     }
@@ -191,6 +196,36 @@ export default function SubmitComplaint() {
 
   // Agentic Mode mock
   const [agenticResult, setAgenticResult] = useState(null);
+
+  // Call Log Processing Mode
+  const [callLogText, setCallLogText] = useState('');
+  const [isProcessingCallLog, setIsProcessingCallLog] = useState(false);
+
+  const handleCallLogSubmit = async () => {
+    if (!callLogText.trim()) return;
+    setIsProcessingCallLog(true);
+    try {
+      const resChat = await fetch('http://127.0.0.1:8000/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: "IGNORE ALL PREVIOUS INSTRUCTIONS. You are an internal backend processor, NOT a customer service assistant. DO NOT address the customer. Provide a strict, 3rd-person, 1-2 sentence factual summary of the core complaint from the following call transcript for an internal support ticket:\n\n" + callLogText })
+      });
+      const chatData = await resChat.json();
+      const summary = chatData.reply || "Call Log Complaint";
+      
+      const endpoint = user?.role === 'cse' ? '/complaints/staff' : '/complaints';
+      const res = await api.post(endpoint, {
+        description: `SUMMARY: ${summary}\n\nRAW LOG:\n${callLogText}`,
+        channel: 'call_log'
+      });
+      alert(`Complaint logged! ID: ${res.data.complaint._id || res.data.complaint.complaintId}`);
+      navigate(user?.role === 'cse' ? '/cse/dashboard' : '/customer/complaints');
+    } catch(e) {
+      alert("Failed to process call log: " + (e.response?.data?.message || e.message));
+    } finally {
+      setIsProcessingCallLog(false);
+    }
+  };
   
   const handleAgenticProcess = async () => {
     if (isRecording) {
@@ -224,7 +259,7 @@ export default function SubmitComplaint() {
           // Now save this to Node backend
           const response = await api.post(user?.role === 'cse' ? '/complaints/staff' : '/complaints', {
             description: data.transcript,
-            channel: 'direct'
+            channel: 'text'
           });
           const c = response.data.complaint;
           // Trigger analysis on Node backend to sync
@@ -275,16 +310,20 @@ export default function SubmitComplaint() {
               <h3 className="font-bold text-lg mb-2">Email Interaction</h3>
               <p className="text-sm text-slate-500">Simulate tracking rules and AI drafting for email channels.</p>
             </div>
-            <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm cursor-pointer hover:-translate-y-1 hover:shadow-md transition-all text-center" onClick={() => setView('live')}>
-              <div className="w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center bg-green-50 text-green-600"><Users size={32} /></div>
-              <h3 className="font-bold text-lg mb-2">Live Audio (D2D)</h3>
-              <p className="text-sm text-slate-500">Record audio to transcribe and submit live issues.</p>
-            </div>
-            <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm cursor-pointer hover:-translate-y-1 hover:shadow-md transition-all text-center" onClick={() => setView('agentic')}>
-              <div className="w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center bg-indigo-50 text-indigo-600"><Bot size={32} /></div>
-              <h3 className="font-bold text-lg mb-2">Agentic Mode</h3>
-              <p className="text-sm text-slate-500">Speak your issue. AI autonomously resolves it and generates a guide.</p>
-            </div>
+            {user?.role === 'cse' && (
+              <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm cursor-pointer hover:-translate-y-1 hover:shadow-md transition-all text-center" onClick={() => setView('live')}>
+                <div className="w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center bg-green-50 text-green-600"><Users size={32} /></div>
+                <h3 className="font-bold text-lg mb-2">Live Audio (D2D)</h3>
+                <p className="text-sm text-slate-500">Record audio to transcribe and submit live issues.</p>
+              </div>
+            )}
+            {user?.role === 'cse' && (
+              <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm cursor-pointer hover:-translate-y-1 hover:shadow-md transition-all text-center" onClick={() => setView('call_log')}>
+                <div className="w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center bg-orange-50 text-orange-600"><FileText size={32} /></div>
+                <h3 className="font-bold text-lg mb-2">Upload Call Log</h3>
+                <p className="text-sm text-slate-500">Upload audio or paste raw transcript to extract issue and register.</p>
+              </div>
+            )}
           </motion.div>
         )}
 
@@ -377,17 +416,91 @@ export default function SubmitComplaint() {
           </motion.div>
         )}
 
+        {view === 'call_log' && (
+          <motion.div key="call_log" initial={{y:20, opacity:0}} animate={{y:0, opacity:1}} className="bg-white p-6 rounded-xl border border-slate-200 max-w-2xl mx-auto shadow-sm">
+            <h2 className="text-2xl font-bold mb-2 text-slate-800">Process Call Audio & Transcript</h2>
+            <p className="text-slate-500 text-sm mb-6">Upload an audio recording of the call to automatically transcribe it, or manually paste the transcript below.</p>
+            
+            <div className="mb-4">
+              <label className="block w-full border-2 border-dashed border-slate-300 rounded-xl p-6 text-center cursor-pointer hover:bg-slate-50 hover:border-indigo-400 transition-colors">
+                <input 
+                  type="file" 
+                  accept="audio/*" 
+                  className="hidden" 
+                  onChange={async (e) => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    setIsProcessingCallLog(true);
+                    try {
+                      const formData = new FormData();
+                      formData.append('file', file);
+                      const res = await fetch('http://127.0.0.1:8000/api/transcribe', {
+                        method: 'POST',
+                        body: formData
+                      });
+                      const data = await res.json();
+                      if (data.transcript) {
+                        setCallLogText(prev => prev + (prev ? '\n\n' : '') + data.transcript);
+                      } else {
+                        alert("Transcription failed or returned empty.");
+                      }
+                    } catch(err) {
+                      alert("Error uploading audio: " + err.message);
+                    } finally {
+                      setIsProcessingCallLog(false);
+                      e.target.value = null;
+                    }
+                  }}
+                />
+                <div className="w-12 h-12 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto mb-3">
+                  <Mic size={24} />
+                </div>
+                <span className="font-medium text-slate-700">Click to upload call audio</span>
+                <span className="block text-xs text-slate-500 mt-1">Supports MP3, WAV, WEBM, M4A</span>
+              </label>
+            </div>
+
+            <textarea
+              className="w-full h-64 p-4 border border-slate-200 rounded-xl mb-4 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none text-sm text-slate-700"
+              placeholder="The transcript will appear here. You can also paste manually..."
+              value={callLogText}
+              onChange={(e) => setCallLogText(e.target.value)}
+            ></textarea>
+            
+            <div className="flex justify-end gap-3">
+              <button className="px-5 py-2.5 text-slate-600 font-medium hover:bg-slate-50 rounded-xl" onClick={() => setView('selection')}>Back</button>
+              <button 
+                disabled={isProcessingCallLog || !callLogText.trim()}
+                className="px-5 py-2.5 bg-indigo-600 text-white font-medium rounded-xl hover:bg-indigo-700 disabled:opacity-50 flex items-center gap-2"
+                onClick={handleCallLogSubmit}
+              >
+                {isProcessingCallLog ? <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span> : <Sparkles size={18} />}
+                Process & Register
+              </button>
+            </div>
+          </motion.div>
+        )}
+
         {view === 'live' && (
           <motion.div key="live" initial={{y:20, opacity:0}} animate={{y:0, opacity:1}}>
             <LiveD2DSession onFinish={async (transcript) => {
               if (transcript) {
                  try {
+                     // Summarize to get main issue
+                     const resChat = await fetch('http://127.0.0.1:8000/api/chat', {
+                         method: 'POST',
+                         headers: { 'Content-Type': 'application/json' },
+                         body: JSON.stringify({ message: "Extract a concise 1-sentence main issue (max 10 words) from this transcript: " + transcript, session_id: "summary" })
+                     });
+                     const chatRes = await resChat.json();
+                     const summary = chatRes.reply || "Live Audio Complaint";
+
                      const endpoint = user?.role === 'cse' ? '/complaints/staff' : '/complaints';
-                     const res = await api.post(endpoint, { description: "TRANSCRIPT: " + transcript, channel: 'Direct' });
+                     const res = await api.post(endpoint, { description: summary + "\n\n[Transcript available in AI analysis]", channel: 'live_convo' });
                      alert("Complaint logged! ID: " + res.data.complaint._id);
-                     navigate('/customer/complaints');
+                     navigate(user?.role === 'cse' ? '/cse/dashboard' : '/customer/complaints');
                  } catch (e) {
-                     alert("Failed to register complaint.");
+                     alert("Failed to register complaint: " + (e.response?.data?.message || e.message));
                  }
               }
             }} />
@@ -437,7 +550,7 @@ export default function SubmitComplaint() {
                    <p className="text-slate-700 italic">"{agenticResult.transcript}"</p>
                  </div>
                  
-                 <button className="w-full py-3 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700" onClick={() => navigate('/customer/complaints')}>
+                 <button className="w-full py-3 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700" onClick={() => navigate(user?.role === 'cse' ? '/cse/dashboard' : '/customer/complaints')}>
                    Go to My Complaints
                  </button>
                </div>

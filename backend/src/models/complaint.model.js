@@ -46,6 +46,7 @@ const complaintSchema = new mongoose.Schema({
             "Registered",
             "Assigned",
             "In Progress",
+            "Under Consideration",
             "Resolved",
             "Escalated",
         ],
@@ -56,13 +57,6 @@ const complaintSchema = new mongoose.Schema({
 
     channel: {
         type: String,
-        enum: [
-            "text",
-            "email",
-            "call",
-            "chatbot",
-            "direct",
-        ],
         default: "text",
         required: true,
         index: true,

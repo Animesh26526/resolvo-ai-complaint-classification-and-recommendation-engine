@@ -7,10 +7,6 @@ export default function QATDashboard() {
     <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto p-6 lg:p-8 bg-slate-50 min-h-full">
       <div className="flex items-center gap-3 mb-2">
         <span className="px-3 py-1 rounded-md bg-slate-900 text-white font-mono text-xs uppercase font-medium tracking-wide">Quality Assurance Dashboard</span>
-        <span className="font-mono text-xs text-slate-500 flex items-center gap-2 px-3 py-1 rounded-md bg-white border border-slate-200">
-          <span className="inline-block w-2 h-2 rounded-full bg-emerald-500"></span>
-          Sync Engine v4.1 Active
-        </span>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-4">

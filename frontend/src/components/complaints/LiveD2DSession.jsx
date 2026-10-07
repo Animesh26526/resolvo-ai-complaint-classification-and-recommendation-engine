@@ -81,78 +81,59 @@ const LiveD2DSession = ({ onFinish }) => {
   };
 
   const connectToGemini = async () => {
-    if (!GEMINI_API_KEY) {
-      setErrorMsg("No API Key detected. Please provide VITE_GEMINI_API_KEY or use Simulation Mode.");
-      return;
-    }
+    // --- TEMPORARY SIMULATION BYPASS ---
+    // Due to the 1008 Google Policy Ban, we are routing to Simulation Mode today.
+    console.warn("Bypassing Google 1008 Region Lock -> Routing to Simulation Mode");
+    startSimulation();
 
+    /*
+    // --- HOW TO RESTORE REAL GEMINI AUDIO TOMORROW ---
+    // When your Google API ban resets tomorrow, delete the 3 lines of code above,
+    // and uncomment the block below to restore the real Live Audio connection!
+    
+    const activeKey = import.meta.env.VITE_GEMINI_API_KEY?.trim();
+    if (!activeKey) return setErrorMsg("No API Key detected.");
     setStatus('connecting');
     setTranscript('');
     setErrorMsg('');
-
-    const ws = new WebSocket(WS_URL);
+    const url = `wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContent?key=${activeKey}`;
+    const ws = new WebSocket(url);
     wsRef.current = ws;
-
     ws.onopen = () => {
       ws.send(JSON.stringify({
-        setup: {
-          model: "models/gemini-3.1-flash-live-preview",
-          generationConfig: { responseModalities: ["AUDIO"] },
-          systemInstruction: {
-            parts: [{ text: "You are a Resolvo AI Customer Support Agent. You handle live packaged water bottle complaints via audio. Extract the category, sentiment, and priority. Only respond in concise sentences." }]
-          }
-        }
+        setup: { model: "models/gemini-2.0-flash", generationConfig: { responseModalities: ["AUDIO"] } }
       }));
+      setStatus('connected');
+      startMicrophone();
+      startLocalSTT();
     };
-
     ws.onmessage = async (event) => {
-      let data;
       try {
-        if (event.data instanceof Blob) {
-          const text = await event.data.text();
-          data = JSON.parse(text);
-        } else {
-          data = JSON.parse(event.data);
+        let msg = event.data;
+        if (msg instanceof Blob) msg = await msg.text();
+        msg = JSON.parse(msg);
+        if (msg.serverContent && msg.serverContent.modelTurn) {
+          const parts = msg.serverContent.modelTurn.parts;
+          for (const p of parts) {
+            if (p.text) setTranscript(prev => prev + p.text);
+            if (p.inlineData && p.inlineData.data) queueOutputAudio(p.inlineData.data);
+          }
+          if (transcript.includes("[REGISTER_COMPLAINT]")) stopSession(true);
         }
-      } catch (e) { return; }
-
-      if (data.error) {
-        setErrorMsg(`API Error: ${data.error.message || "Unauthorized Caller"}`);
-        stopSession();
-        return;
-      }
-
-      if (data.setupComplete) {
-        setStatus('connected');
-        startMicrophone();
-        startLocalSTT();
-      } else if (data.serverContent?.modelTurn) {
-        const parts = data.serverContent.modelTurn.parts;
-        for (const p of parts) {
-          if (p.text) setTranscript(prev => prev + (prev ? "\n" : "") + "Resolvo AI: " + p.text);
-          if (p.inlineData && p.inlineData.data) queueOutputAudio(p.inlineData.data);
-        }
-      }
+      } catch (e) {}
     };
-
-    ws.onerror = () => {
-      setErrorMsg("WebSocket connection error. Check your API Key configuration.");
-      stopSession();
-    };
-
+    ws.onerror = () => { stopSession(false, true); };
     ws.onclose = (e) => {
-      if (e.code === 1008) {
-        setErrorMsg("Unregistered Caller (1008): Establish identity via VITE_GEMINI_API_KEY.");
-      } else if (e.code !== 1000) {
-        setErrorMsg(`WebSocket disconnected (Code: ${e.code})`);
-      }
-      stopSession();
+      if (e.code === 1008) setErrorMsg(prev => prev || "1008: Policy Violation.");
+      else if (e.code !== 1000) setErrorMsg(prev => prev || `Disconnected: ${e.code}`);
+      stopSession(false, true);
     };
+    */
   };
 
   const startMicrophone = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: { channelCount: 1, sampleRate: 16000 }});
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
       const audioCtx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 16000 });
       audioCtxRef.current = audioCtx;
@@ -171,15 +152,24 @@ const LiveD2DSession = ({ onFinish }) => {
           const uint8 = new Uint8Array(pcm16.buffer);
           let binary = '';
           for (let i = 0; i < uint8.byteLength; i++) binary += String.fromCharCode(uint8[i]);
+          
           wsRef.current.send(JSON.stringify({
-            realtimeInput: { audio: { mimeType: "audio/pcm;rate=16000", data: btoa(binary) } }
+            realtimeInput: {
+              mediaChunks: [
+                {
+                  mimeType: "audio/pcm",
+                  data: btoa(binary)
+                }
+              ]
+            }
           }));
         }
       };
       source.connect(processor);
       processor.connect(audioCtx.destination);
     } catch (e) {
-      stopSession();
+      setErrorMsg(`Microphone Error: ${e.message}`);
+      stopSession(false, true);
     }
   };
 
@@ -217,7 +207,7 @@ const LiveD2DSession = ({ onFinish }) => {
     source.start();
   };
 
-  const stopSession = (isAuto = false) => {
+  const stopSession = (isAuto = false, skipEmptyCheck = false) => {
     if (wsRef.current) wsRef.current.close();
     if (streamRef.current) streamRef.current.getTracks().forEach(t => t.stop());
     if (processorRef.current) processorRef.current.disconnect();
@@ -230,7 +220,7 @@ const LiveD2DSession = ({ onFinish }) => {
 
     if (transcript.trim().length > 0) {
       onFinish(transcript, isSimulating);
-    } else if (!isAuto) {
+    } else if (!isAuto && !skipEmptyCheck) {
       setErrorMsg("No speech detected. Please check your microphone and try again.");
     }
   };

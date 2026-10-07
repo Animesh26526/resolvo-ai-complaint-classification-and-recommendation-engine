@@ -11,7 +11,7 @@ const slaService = require("../services/sla.service");
 
 const VALID_CATEGORIES = ["Product", "Packaging", "Trade"];
 const VALID_PRIORITIES = ["High", "Medium", "Low"];
-const VALID_CHANNELS = ["text", "email", "call", "chatbot", "direct"];
+const VALID_CHANNELS = ["text", "call_log", "live_convo", "email"];
 
 const VALID_STATUSES = [
     "Received",
@@ -19,6 +19,7 @@ const VALID_STATUSES = [
     "Registered",
     "Assigned",
     "In Progress",
+    "Under Consideration",
     "Resolved",
     "Escalated",
 ];
@@ -29,37 +30,50 @@ const VALID_STATUS_TRANSITIONS = {
         "Registered",
         "Assigned",
         "In Progress",
+        "Under Consideration",
         "Resolved",
     ],
     "Analyzed": [
         "Registered",
         "Assigned",
         "In Progress",
+        "Under Consideration",
         "Resolved",
     ],
     "Registered": [
         "Analyzed",
         "Assigned",
         "In Progress",
+        "Under Consideration",
         "Resolved",
     ],
     "Assigned": [
         "Analyzed",
         "In Progress",
+        "Under Consideration",
         "Resolved",
         "Escalated",
     ],
     "In Progress": [
         "Analyzed",
+        "Under Consideration",
+        "Resolved",
+        "Escalated",
+    ],
+    "Under Consideration": [
+        "Analyzed",
+        "In Progress",
         "Resolved",
         "Escalated",
     ],
     "Escalated": [
         "In Progress",
+        "Under Consideration",
         "Resolved",
     ],
     "Resolved": [
         "In Progress",
+        "Under Consideration",
         "Escalated",
     ],
 };
@@ -103,6 +117,13 @@ async function createComplaint(req, res) {
     const receivedAt = new Date();
     const slaDeadline = priority ? slaService.calculateSlaDeadline(priority, receivedAt) : null;
 
+    // Auto-assign to a CSE
+    const cses = await userModel.find({ role: "cse" });
+    let assignedCse = null;
+    if (cses.length > 0) {
+        assignedCse = cses[Math.floor(Math.random() * cses.length)]._id;
+    }
+
     const complaint = await complaintModel.create({
         description: description.trim(),
         channel: selectedChannel,
@@ -110,12 +131,32 @@ async function createComplaint(req, res) {
         priority: priority || null,
         status: "Received",
         customer: req.user.id,
+        assignedTo: assignedCse,
         receivedAt: receivedAt,
         slaDeadline: slaDeadline,
     });
 
+    // Auto-trigger AI analysis in background
+    aiService.analyzeComplaint({
+        description: complaint.description,
+        channel: complaint.channel,
+    }).then(async (aiResult) => {
+        const c = await complaintModel.findById(complaint._id);
+        if (c) {
+            c.category = aiResult.category;
+            c.sentiment = aiResult.sentiment;
+            c.priority = aiResult.priority;
+            c.aiRecommendation = aiResult.recommendation;
+            if (aiResult.priority && !c.slaDeadline) {
+                c.slaDeadline = slaService.calculateSlaDeadline(aiResult.priority, c.receivedAt);
+            }
+            c.status = "Analyzed";
+            await c.save();
+        }
+    }).catch(err => console.error("Auto AI Analysis failed:", err));
+
     res.status(201).json({
-        message: "Complaint created successfully",
+        message: "Complaint created successfully and analysis started",
         complaint: complaint,
     });
 
@@ -384,7 +425,7 @@ async function registerComplaintByCse(req, res) {
         });
     }
 
-    const selectedChannel = channel ? channel.toLowerCase() : "direct";
+    const selectedChannel = channel ? channel.toLowerCase() : "text";
 
     if (!VALID_CHANNELS.includes(selectedChannel)) {
         return res.status(400).json({
@@ -441,6 +482,14 @@ async function registerComplaintByCse(req, res) {
     const receivedAt = new Date();
     const slaDeadline = priority ? slaService.calculateSlaDeadline(priority, receivedAt) : null;
 
+    // Auto-assign to a CSE
+    const cses = await userModel.find({ role: "cse" });
+    let assignedCse = req.user.id; // default to the one registering
+    if (cses.length > 0) {
+        // Randomly distribute
+        assignedCse = cses[Math.floor(Math.random() * cses.length)]._id;
+    }
+
     const complaint = await complaintModel.create({
         description: description.trim(),
         channel: selectedChannel,
@@ -448,7 +497,7 @@ async function registerComplaintByCse(req, res) {
         priority: priority || null,
         status: "Registered",
         customer: targetCustomerId,
-        assignedTo: req.user.id,
+        assignedTo: assignedCse,
         receivedAt: receivedAt,
         slaDeadline: slaDeadline,
     });
@@ -459,8 +508,26 @@ async function registerComplaintByCse(req, res) {
         .populate("assignedTo", "name email role")
         .populate("resolution");
 
+    // Auto-trigger AI analysis
+    aiService.analyzeComplaint({
+        description: complaint.description,
+        channel: complaint.channel,
+    }).then(async (aiResult) => {
+        const c = await complaintModel.findById(complaint._id);
+        if (c) {
+            c.category = aiResult.category;
+            c.sentiment = aiResult.sentiment;
+            c.priority = aiResult.priority;
+            c.aiRecommendation = aiResult.recommendation;
+            if (aiResult.priority && !c.slaDeadline) {
+                c.slaDeadline = slaService.calculateSlaDeadline(aiResult.priority, c.receivedAt);
+            }
+            await c.save();
+        }
+    }).catch(err => console.error("Auto AI Analysis failed:", err));
+
     res.status(201).json({
-        message: "Complaint registered successfully by CSE",
+        message: "Complaint registered successfully by CSE and analysis started",
         complaint: populatedComplaint,
     });
 
@@ -468,99 +535,80 @@ async function registerComplaintByCse(req, res) {
 
 
 async function updateComplaintStatus(req, res) {
+    try {
+        const { id } = req.params;
+        const { status, remarks, actionTaken } = req.body;
 
-    const { id } = req.params;
-    const { status, remarks, actionTaken } = req.body;
-
-    if (!status) {
-        return res.status(400).json({
-            message: "New status is required",
-        });
-    }
-
-    if (!VALID_STATUSES.includes(status)) {
-        return res.status(400).json({
-            message: `Invalid status. Allowed values: ${VALID_STATUSES.join(", ")}`,
-        });
-    }
-
-    const isMongoId = mongoose.Types.ObjectId.isValid(id);
-
-    const query = isMongoId
-        ? { _id: id }
-        : { complaintId: id };
-
-    const complaint = await complaintModel.findOne(query);
-
-    if (!complaint) {
-        return res.status(404).json({
-            message: "Complaint not found",
-        });
-    }
-
-    const currentStatus = complaint.status;
-
-    if (currentStatus === status && !actionTaken && !remarks) {
-        return res.status(200).json({
-            message: `Complaint is already in '${status}' status`,
-            complaint: complaint,
-        });
-    }
-
-    const allowedTransitions = VALID_STATUS_TRANSITIONS[currentStatus] || [];
-
-    if (currentStatus !== status && !allowedTransitions.includes(status)) {
-        return res.status(400).json({
-            message: `Invalid status transition from '${currentStatus}' to '${status}'. Allowed transitions: ${allowedTransitions.join(", ")}`,
-        });
-    }
-
-    complaint.status = status;
-
-    if (status === "Resolved") {
-        complaint.resolvedAt = new Date();
-
-        let resolution = await resolutionModel.findOne({ complaint: complaint._id });
-
-        if (!resolution) {
-            resolution = await resolutionModel.create({
-                complaint: complaint._id,
-                recommendation: complaint.aiRecommendation,
-                actionTaken: actionTaken ? actionTaken.trim() : null,
-                remarks: remarks ? remarks.trim() : null,
-                resolvedBy: req.user.id,
-                resolvedAt: new Date(),
-            });
-        } else {
-            if (actionTaken) {
-                resolution.actionTaken = actionTaken.trim();
-            }
-            if (remarks) {
-                resolution.remarks = remarks.trim();
-            }
-            resolution.resolvedBy = req.user.id;
-            resolution.resolvedAt = new Date();
-            await resolution.save();
+        if (!status) {
+            return res.status(400).json({ message: "New status is required" });
         }
 
-        complaint.resolution = resolution._id;
-    } else {
-        complaint.resolvedAt = null;
+        if (!VALID_STATUSES.includes(status)) {
+            return res.status(400).json({ message: `Invalid status. Allowed values: ${VALID_STATUSES.join(", ")}` });
+        }
+
+        const isMongoId = mongoose.Types.ObjectId.isValid(id);
+        const query = isMongoId ? { _id: id } : { complaintId: id };
+        const complaint = await complaintModel.findOne(query);
+
+        if (!complaint) {
+            return res.status(404).json({ message: "Complaint not found" });
+        }
+
+        const currentStatus = complaint.status;
+
+        if (currentStatus === status && !actionTaken && !remarks) {
+            return res.status(200).json({ message: `Complaint is already in '${status}' status`, complaint: complaint });
+        }
+
+        const allowedTransitions = VALID_STATUS_TRANSITIONS[currentStatus] || [];
+        if (currentStatus !== status && !allowedTransitions.includes(status)) {
+            return res.status(400).json({ message: `Invalid status transition from '${currentStatus}' to '${status}'. Allowed transitions: ${allowedTransitions.join(", ")}` });
+        }
+
+        complaint.status = status;
+
+        if (status === "Resolved") {
+            complaint.resolvedAt = new Date();
+            let resolution = await resolutionModel.findOne({ complaint: complaint._id });
+            if (!resolution) {
+                resolution = await resolutionModel.create({
+                    complaint: complaint._id,
+                    recommendation: complaint.aiRecommendation,
+                    actionTaken: actionTaken ? actionTaken.trim() : null,
+                    remarks: remarks ? remarks.trim() : null,
+                    resolvedBy: req.user.id,
+                    resolvedAt: new Date(),
+                });
+            } else {
+                if (actionTaken) {
+                    resolution.actionTaken = actionTaken.trim();
+                }
+                if (remarks) {
+                    resolution.remarks = remarks.trim();
+                }
+                resolution.resolvedBy = req.user.id;
+                resolution.resolvedAt = new Date();
+                await resolution.save();
+            }
+            complaint.resolution = resolution._id;
+        } else {
+            complaint.resolvedAt = null;
+        }
+
+        await complaint.save();
+
+        const updatedComplaint = await complaintModel
+            .findById(complaint._id)
+            .populate("customer", "name email role")
+            .populate("assignedTo", "name email role")
+            .populate("resolution");
+
+        res.status(200).json({ message: `Complaint status updated to '${status}' successfully`, complaint: updatedComplaint });
+    } catch (err) {
+        console.error("updateComplaintStatus Error:", err);
+        return res.status(500).json({ message: "Server error during status update: " + err.message });
     }
-
-    await complaint.save();
-
-    const updatedComplaint = await complaintModel
-        .findById(complaint._id)
-        .populate("customer", "name email role")
-        .populate("assignedTo", "name email role")
-        .populate("resolution");
-
-    res.status(200).json({
-        message: `Complaint status updated to '${status}' successfully`,
-        complaint: updatedComplaint,
-    });
-
 }
 
 
@@ -622,110 +670,93 @@ async function assignComplaint(req, res) {
 
 
 async function analyzeComplaint(req, res) {
-
-    const { id } = req.params;
-
-    const isMongoId = mongoose.Types.ObjectId.isValid(id);
-
-    const query = isMongoId
-        ? { _id: id }
-        : { complaintId: id };
-
-    const complaint = await complaintModel.findOne(query);
-
-    if (!complaint) {
-        return res.status(404).json({
-            message: "Complaint not found",
-        });
-    }
-
-    const isCustomer = req.user.role === "customer";
-    const customerId = complaint.customer._id
-        ? complaint.customer._id.toString()
-        : complaint.customer.toString();
-
-    if (isCustomer && customerId !== req.user.id) {
-        return res.status(403).json({
-            message: "Access denied: You do not have permission to analyze this complaint",
-        });
-    }
-
-    let aiResult;
-
     try {
+        const { id } = req.params;
+        const isMongoId = mongoose.Types.ObjectId.isValid(id);
+        const query = isMongoId ? { _id: id } : { complaintId: id };
+        const complaint = await complaintModel.findOne(query);
 
-        aiResult = await aiService.analyzeComplaint({
-            description: complaint.description,
-            channel: complaint.channel,
-        });
-
-    } catch (aiError) {
-
-        const statusCode = aiError.statusCode || 502;
-        return res.status(statusCode).json({
-            message: aiError.message || "AI analysis service is unavailable",
-        });
-
-    }
-
-    complaint.category = aiResult.category;
-    complaint.sentiment = aiResult.sentiment;
-    complaint.priority = aiResult.priority;
-    complaint.aiRecommendation = aiResult.recommendation;
-
-    if (aiResult.priority && !complaint.slaDeadline) {
-        complaint.slaDeadline = slaService.calculateSlaDeadline(aiResult.priority, complaint.receivedAt);
-    }
-
-    let resolution = await resolutionModel.findOne({ complaint: complaint._id });
-
-    if (!resolution) {
-        resolution = await resolutionModel.create({
-            complaint: complaint._id,
-            recommendation: aiResult.recommendation,
-        });
-    } else {
-        resolution.recommendation = aiResult.recommendation;
-    }
-
-    if (aiResult.is_resolvable_by_ai) {
-        complaint.status = "Resolved";
-        complaint.resolvedAt = new Date();
-        resolution.remarks = "Resolved automatically by AI recommendation.";
-        resolution.actionTaken = "AI Resolution Provided";
-        resolution.resolvedAt = new Date();
-    } else {
-        if (complaint.status === "Received") {
-            complaint.status = "Analyzed";
+        if (!complaint) {
+            return res.status(404).json({ message: "Complaint not found" });
         }
+
+        const isCustomer = req.user.role === "customer";
+        const customerId = complaint.customer._id ? complaint.customer._id.toString() : complaint.customer.toString();
+
+        if (isCustomer && customerId !== req.user.id) {
+            return res.status(403).json({ message: "Access denied: You do not have permission to analyze this complaint" });
+        }
+
+        let aiResult;
+        try {
+            aiResult = await aiService.analyzeComplaint({
+                description: complaint.description,
+                channel: complaint.channel,
+            });
+        } catch (aiError) {
+            const statusCode = aiError.statusCode || 502;
+            return res.status(statusCode).json({ message: aiError.message || "AI analysis service is unavailable" });
+        }
+
+        complaint.category = aiResult.category;
+        complaint.sentiment = aiResult.sentiment;
+        complaint.priority = aiResult.priority;
+        complaint.aiRecommendation = aiResult.recommendation;
+
+        if (aiResult.priority && !complaint.slaDeadline) {
+            complaint.slaDeadline = slaService.calculateSlaDeadline(aiResult.priority, complaint.receivedAt);
+        }
+
+        let resolution = await resolutionModel.findOne({ complaint: complaint._id });
+        if (!resolution) {
+            resolution = await resolutionModel.create({
+                complaint: complaint._id,
+                recommendation: aiResult.recommendation,
+            });
+        } else {
+            resolution.recommendation = aiResult.recommendation;
+        }
+
+        if (aiResult.is_resolvable_by_ai) {
+            complaint.status = "Resolved";
+            complaint.resolvedAt = new Date();
+            resolution.remarks = "Resolved automatically by AI recommendation.";
+            resolution.actionTaken = "AI Resolution Provided";
+            resolution.resolvedAt = new Date();
+        } else {
+            if (complaint.status === "Received") {
+                complaint.status = "Analyzed";
+            }
+        }
+
+        await resolution.save();
+        complaint.resolution = resolution._id;
+        await complaint.save();
+
+        const updatedComplaint = await complaintModel
+            .findById(complaint._id)
+            .populate("customer", "name email role")
+            .populate("assignedTo", "name email role")
+            .populate("resolution");
+
+        res.status(200).json({
+            message: aiResult.is_resolvable_by_ai
+                ? "Complaint analyzed and resolved automatically by AI"
+                : "Complaint analyzed successfully",
+            complaint: updatedComplaint,
+            analysis: {
+                category: aiResult.category,
+                sentiment: aiResult.sentiment,
+                priority: aiResult.priority,
+                recommendation: aiResult.recommendation,
+                isResolvableByAi: aiResult.is_resolvable_by_ai,
+            },
+            resolution: resolution,
+        });
+    } catch (err) {
+        console.error("analyzeComplaint Error:", err);
+        return res.status(500).json({ message: "Server error during analysis: " + err.message });
     }
-
-    await resolution.save();
-
-    complaint.resolution = resolution._id;
-    await complaint.save();
-
-    const updatedComplaint = await complaintModel
-        .findById(complaint._id)
-        .populate("customer", "name email role")
-        .populate("assignedTo", "name email role")
-        .populate("resolution");
-
-    res.status(200).json({
-        message: aiResult.is_resolvable_by_ai
-            ? "Complaint analyzed and resolved automatically by AI"
-            : "Complaint analyzed successfully",
-        complaint: updatedComplaint,
-        analysis: {
-            category: aiResult.category,
-            sentiment: aiResult.sentiment,
-            priority: aiResult.priority,
-            recommendation: aiResult.recommendation,
-            isResolvableByAi: aiResult.is_resolvable_by_ai,
-        },
-        resolution: resolution,
-    });
-
 }
 
 
