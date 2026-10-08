@@ -194,8 +194,7 @@ export default function SubmitComplaint() {
     }
   };
 
-  // Agentic Mode mock
-  const [agenticResult, setAgenticResult] = useState(null);
+
 
   // Call Log Processing Mode
   const [callLogText, setCallLogText] = useState('');
@@ -227,61 +226,7 @@ export default function SubmitComplaint() {
     }
   };
   
-  const handleAgenticProcess = async () => {
-    if (isRecording) {
-      mediaRecorderRef.current?.stop();
-      setIsRecording(false);
-      return;
-    }
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
-      mediaRecorderRef.current = mediaRecorder;
-      audioChunksRef.current = [];
 
-      mediaRecorder.ondataavailable = (e) => {
-        if (e.data.size > 0) audioChunksRef.current.push(e.data);
-      };
-
-      mediaRecorder.onstop = async () => {
-        stream.getTracks().forEach(t => t.stop());
-        const blob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-        const formData = new FormData();
-        formData.append('file', blob, 'recording.webm');
-        formData.append('channel', 'direct');
-        
-        try {
-          const res = await fetch('http://127.0.0.1:8000/api/audio-complaint', {
-            method: 'POST',
-            body: formData
-          });
-          const data = await res.json();
-          // Now save this to Node backend
-          const response = await api.post(user?.role === 'cse' ? '/complaints/staff' : '/complaints', {
-            description: data.transcript,
-            channel: 'text'
-          });
-          const c = response.data.complaint;
-          // Trigger analysis on Node backend to sync
-          const analysisRes = await api.post(`/complaints/${c._id}/analyze`);
-
-          setAgenticResult({
-            complaint: c,
-            analysis: analysisRes.data.analysis,
-            transcript: data.transcript
-          });
-        } catch(err) {
-          console.error(err);
-          alert("Agentic processing failed");
-        }
-      };
-
-      mediaRecorder.start();
-      setIsRecording(true);
-    } catch(err) {
-      alert("Microphone access denied");
-    }
-  };
 
   return (
     <div className="flex flex-col w-full p-6 lg:p-8 gap-6 max-w-4xl mx-auto">
@@ -291,7 +236,7 @@ export default function SubmitComplaint() {
           <p className="text-sm text-slate-500">Select the channel to interact and document the customer issue.</p>
         </div>
         {(view !== 'selection') && (
-          <button className="px-4 py-2 border border-slate-200 rounded-lg text-sm font-medium hover:bg-slate-50" onClick={() => { setView('selection'); setSessionComplaint(null); setAgenticResult(null); }}>
+          <button className="px-4 py-2 border border-slate-200 rounded-lg text-sm font-medium hover:bg-slate-50" onClick={() => { setView('selection'); setSessionComplaint(null); }}>
             &larr; Back to Channels
           </button>
         )}
@@ -310,13 +255,11 @@ export default function SubmitComplaint() {
               <h3 className="font-bold text-lg mb-2">Email Interaction</h3>
               <p className="text-sm text-slate-500">Simulate tracking rules and AI drafting for email channels.</p>
             </div>
-            {user?.role === 'cse' && (
-              <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm cursor-pointer hover:-translate-y-1 hover:shadow-md transition-all text-center" onClick={() => setView('live')}>
-                <div className="w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center bg-green-50 text-green-600"><Users size={32} /></div>
-                <h3 className="font-bold text-lg mb-2">Live Audio (D2D)</h3>
-                <p className="text-sm text-slate-500">Record audio to transcribe and submit live issues.</p>
-              </div>
-            )}
+            <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm cursor-pointer hover:-translate-y-1 hover:shadow-md transition-all text-center" onClick={() => setView('live')}>
+              <div className="w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center bg-green-50 text-green-600"><Users size={32} /></div>
+              <h3 className="font-bold text-lg mb-2">Live Audio (D2D)</h3>
+              <p className="text-sm text-slate-500">Record audio to transcribe and submit live issues.</p>
+            </div>
             {user?.role === 'cse' && (
               <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm cursor-pointer hover:-translate-y-1 hover:shadow-md transition-all text-center" onClick={() => setView('call_log')}>
                 <div className="w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center bg-orange-50 text-orange-600"><FileText size={32} /></div>
@@ -324,6 +267,7 @@ export default function SubmitComplaint() {
                 <p className="text-sm text-slate-500">Upload audio or paste raw transcript to extract issue and register.</p>
               </div>
             )}
+
           </motion.div>
         )}
 
@@ -506,57 +450,7 @@ export default function SubmitComplaint() {
             }} />
           </motion.div>
         )}
-        {view === 'agentic' && (
-          <motion.div key="agentic" initial={{y:20, opacity:0}} animate={{y:0, opacity:1}} className="bg-white p-8 rounded-xl border border-slate-200 max-w-3xl mx-auto shadow-sm text-center">
-            {!agenticResult ? (
-               <div className="flex flex-col items-center">
-                 <div className="w-20 h-20 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mb-6">
-                   <Sparkles size={40} />
-                 </div>
-                 <h2 className="text-2xl font-bold mb-4 text-slate-800">Agentic Resolution Mode</h2>
-                 <p className="text-slate-500 mb-8 max-w-md">Speak your issue aloud. Resolvo AI will listen, analyze, and generate a visual guide autonomously.</p>
-                 <button 
-                   onClick={handleAgenticProcess}
-                   
-                   className={`px-8 py-3 rounded-full flex items-center gap-3 text-white font-medium transition-all ${isRecording ? 'bg-indigo-400 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700 hover:shadow-lg'}`}
-                 >
-                   {isRecording ? <MicOff size={20} /> : <Mic size={20} />}
-                   {isRecording ? 'Processing with AI...' : 'Start Recording'}
-                 </button>
-               </div>
-            ) : (
-               <div className="text-left">
-                 <div className="flex items-center gap-4 p-6 bg-green-50 border border-green-200 rounded-xl mb-8">
-                   <div className="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center shrink-0"><CheckCircle size={24}/></div>
-                   <div>
-                     <h3 className="font-bold text-green-800">Resolution Ready</h3>
-                     <p className="text-sm text-green-700">Case {agenticResult.complaint._id} analyzed and ready.</p>
-                   </div>
-                 </div>
-                 
-                 <div className="grid grid-cols-2 gap-4 mb-8">
-                   <div className="p-4 border border-slate-200 rounded-lg">
-                     <p className="text-xs text-slate-500 uppercase tracking-wider font-semibold mb-1">Category</p>
-                     <p className="font-bold text-slate-800">{agenticResult.analysis.category || 'N/A'}</p>
-                   </div>
-                   <div className="p-4 border border-slate-200 rounded-lg">
-                     <p className="text-xs text-slate-500 uppercase tracking-wider font-semibold mb-1">Priority</p>
-                     <p className="font-bold text-slate-800">{agenticResult.analysis.priority || 'Medium'}</p>
-                   </div>
-                 </div>
-                 
-                 <div className="p-6 bg-slate-50 border border-slate-200 rounded-xl mb-8">
-                   <h4 className="font-bold text-sm text-slate-500 uppercase tracking-wider mb-2">Transcription</h4>
-                   <p className="text-slate-700 italic">"{agenticResult.transcript}"</p>
-                 </div>
-                 
-                 <button className="w-full py-3 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700" onClick={() => navigate(user?.role === 'cse' ? '/cse/dashboard' : '/customer/complaints')}>
-                   Go to My Complaints
-                 </button>
-               </div>
-            )}
-          </motion.div>
-        )}
+
       </AnimatePresence>
     </div>
   );

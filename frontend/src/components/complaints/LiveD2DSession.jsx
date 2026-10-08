@@ -83,10 +83,10 @@ const LiveD2DSession = ({ onFinish }) => {
   const connectToGemini = async () => {
     // --- TEMPORARY SIMULATION BYPASS ---
     // Due to the 1008 Google Policy Ban, we are routing to Simulation Mode today.
-    console.warn("Bypassing Google 1008 Region Lock -> Routing to Simulation Mode");
-    startSimulation();
+    // console.warn("Bypassing Google 1008 Region Lock -> Routing to Simulation Mode");
+    // startSimulation();
 
-    /*
+    
     // --- HOW TO RESTORE REAL GEMINI AUDIO TOMORROW ---
     // When your Google API ban resets tomorrow, delete the 3 lines of code above,
     // and uncomment the block below to restore the real Live Audio connection!
@@ -101,7 +101,7 @@ const LiveD2DSession = ({ onFinish }) => {
     wsRef.current = ws;
     ws.onopen = () => {
       ws.send(JSON.stringify({
-        setup: { model: "models/gemini-2.0-flash", generationConfig: { responseModalities: ["AUDIO"] } }
+        setup: { model: "models/gemini-2.0-flash-exp", generationConfig: { responseModalities: ["AUDIO"] } }
       }));
       setStatus('connected');
       startMicrophone();
@@ -128,7 +128,7 @@ const LiveD2DSession = ({ onFinish }) => {
       else if (e.code !== 1000) setErrorMsg(prev => prev || `Disconnected: ${e.code}`);
       stopSession(false, true);
     };
-    */
+    
   };
 
   const startMicrophone = async () => {
@@ -138,18 +138,37 @@ const LiveD2DSession = ({ onFinish }) => {
       const audioCtx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 16000 });
       audioCtxRef.current = audioCtx;
       const source = audioCtx.createMediaStreamSource(stream);
-      const processor = audioCtx.createScriptProcessor(4096, 1, 1);
+      // Modern AudioWorklet instead of deprecated ScriptProcessorNode
+      const workletCode = `
+        class PCMProcessor extends AudioWorkletProcessor {
+          process(inputs, outputs, parameters) {
+            const input = inputs[0];
+            if (input && input.length > 0 && input[0].length > 0) {
+              const channelData = input[0];
+              const pcm16 = new Int16Array(channelData.length);
+              for (let i = 0; i < channelData.length; i++) {
+                let s = Math.max(-1, Math.min(1, channelData[i]));
+                pcm16[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+              }
+              this.port.postMessage(pcm16.buffer, [pcm16.buffer]);
+            }
+            return true;
+          }
+        }
+        registerProcessor('pcm-processor', PCMProcessor);
+      `;
+      const blob = new Blob([workletCode], { type: 'application/javascript' });
+      const workletUrl = URL.createObjectURL(blob);
+      await audioCtx.audioWorklet.addModule(workletUrl);
+      
+      if (audioCtx.state === 'closed') return; // Prevent creation on a closed context
+      
+      const processor = new AudioWorkletNode(audioCtx, 'pcm-processor');
       processorRef.current = processor;
 
-      processor.onaudioprocess = (e) => {
+      processor.port.onmessage = (e) => {
         if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-          const channelData = e.inputBuffer.getChannelData(0);
-          const pcm16 = new Int16Array(channelData.length);
-          for (let i = 0; i < channelData.length; i++) {
-            let s = Math.max(-1, Math.min(1, channelData[i]));
-            pcm16[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
-          }
-          const uint8 = new Uint8Array(pcm16.buffer);
+          const uint8 = new Uint8Array(e.data);
           let binary = '';
           for (let i = 0; i < uint8.byteLength; i++) binary += String.fromCharCode(uint8[i]);
           
