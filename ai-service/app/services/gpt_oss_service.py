@@ -61,7 +61,7 @@ class GptOssService:
         category: str,
         sentiment: str,
         priority: str,
-    ) -> Tuple[Optional[str], bool]:
+    ) -> Tuple[str, bool]:
         prompt = (
             f"You are the senior resolution advisor for a wellness and consumer goods company.\n"
             f"Analyze the following complaint details:\n"
@@ -236,7 +236,7 @@ class GptOssService:
         message: str,
         history: Optional[List[ChatMessage]] = None,
         complaint_context: Optional[Dict[str, Any]] = None,
-    ) -> Optional[ChatResponse]:
+    ) -> ChatResponse:
         messages = [
             {
                 "role": "system",

@@ -6,12 +6,12 @@ class AnalyzeComplaintRequest(BaseModel):
     description: str = Field(
         ...,
         description="Detailed complaint narrative or customer statement",
-        example="The organic wellness lotion container was cracked upon arrival and had leaked into the packaging.",
+        examples=["The organic wellness lotion container was cracked upon arrival and had leaked into the packaging."],
     )
     channel: Optional[str] = Field(
         "text",
         description="Intake channel: text, email, call, chatbot, or direct",
-        example="text",
+        examples=["text"],
     )
 
 class AnalyzeComplaintResponse(BaseModel):

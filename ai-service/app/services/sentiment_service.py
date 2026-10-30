@@ -10,7 +10,7 @@ Architecture:
 """
 
 import logging
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional, cast
 from app.config import HF_SENTIMENT_MODEL
 from app.schemas.analysis_schema import SentimentResult
 
@@ -40,7 +40,11 @@ class SentimentService:
         try:
             logger.info(f"Loading Hugging Face sentiment model: {self.model_name}...")
             from transformers import pipeline
-            self._pipeline = pipeline(
+            # The transformers stubs do not include all runtime-supported
+            # keyword combinations, so invoke the pipeline through a dynamic
+            # reference to avoid overload resolution errors.
+            sentiment_pipeline: Any = pipeline
+            self._pipeline = sentiment_pipeline(
                 task="sentiment-analysis",
                 model=self.model_name,
                 device=-1,  # CPU
@@ -78,7 +82,8 @@ class SentimentService:
         if self.is_model_ready:
             try:
                 # HF pipeline returns list of dictionaries [{'label': 'positive', 'score': 0.98}, ...]
-                raw_outputs = self._pipeline(clean_text[:512])  # Truncate to RoBERTa context window
+                sentiment_pipeline = cast(Any, self._pipeline)
+                raw_outputs = sentiment_pipeline(clean_text[:512])  # Truncate to RoBERTa context window
                 if raw_outputs and isinstance(raw_outputs, list):
                     scores_list = raw_outputs[0] if isinstance(raw_outputs[0], list) else raw_outputs
                     best_item = max(scores_list, key=lambda x: x.get("score", 0.0))

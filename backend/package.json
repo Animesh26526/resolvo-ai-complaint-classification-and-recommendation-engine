@@ -10,6 +10,8 @@
     "test:auth": "node test-auth.js",
     "test:complaints": "node test-complaints.js",
     "test:ai": "node test-ai-integration.js",
+    "test:unit": "node test-unit.js",
+    "test:integration": "node test-integration.js",
     "seed": "node seed.js"
   },
   "keywords": [
