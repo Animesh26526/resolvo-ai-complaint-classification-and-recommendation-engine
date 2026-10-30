@@ -202,9 +202,9 @@ async function getComplaintById(req, res) {
     }
 
     const isCustomer = req.user.role === "customer";
-    const customerId = complaint.customer._id
-        ? complaint.customer._id.toString()
-        : complaint.customer.toString();
+    const customerId = complaint.customer
+        ? (complaint.customer._id ? complaint.customer._id.toString() : complaint.customer.toString())
+        : null;
 
     if (isCustomer && customerId !== req.user.id) {
         return res.status(403).json({
@@ -681,7 +681,7 @@ async function analyzeComplaint(req, res) {
         }
 
         const isCustomer = req.user.role === "customer";
-        const customerId = complaint.customer._id ? complaint.customer._id.toString() : complaint.customer.toString();
+        const customerId = complaint.customer ? (complaint.customer._id ? complaint.customer._id.toString() : complaint.customer.toString()) : null;
 
         if (isCustomer && customerId !== req.user.id) {
             return res.status(403).json({ message: "Access denied: You do not have permission to analyze this complaint" });
@@ -779,9 +779,9 @@ async function registerFormalComplaint(req, res) {
     }
 
     const isCustomer = req.user.role === "customer";
-    const customerId = complaint.customer._id
-        ? complaint.customer._id.toString()
-        : complaint.customer.toString();
+    const customerId = complaint.customer
+        ? (complaint.customer._id ? complaint.customer._id.toString() : complaint.customer.toString())
+        : null;
 
     if (isCustomer && customerId !== req.user.id) {
         return res.status(403).json({
@@ -831,9 +831,9 @@ async function getComplaintResolution(req, res) {
     }
 
     const isCustomer = req.user.role === "customer";
-    const customerId = complaint.customer._id
-        ? complaint.customer._id.toString()
-        : complaint.customer.toString();
+    const customerId = complaint.customer
+        ? (complaint.customer._id ? complaint.customer._id.toString() : complaint.customer.toString())
+        : null;
 
     if (isCustomer && customerId !== req.user.id) {
         return res.status(403).json({
