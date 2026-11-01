@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script><script id="tailwind-config">tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "on-tertiary-container": "#98805d",
+          "on-surface": "#0f172a",
+          "primary": "#0f172a",
+          "surface-container-high": "#e2e8f0",
+          "surface": "#f8fafc",
+          "surface-container": "#f1f5f9",
+          "surface-container-low": "#f8fafc",
+          "surface-container-lowest": "#ffffff",
+          "slate-border": "#e2e8f0",
+          "text-muted": "#64748b"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.375rem",
+          "lg": "0.5rem",
+          "xl": "0.75rem",
+          "full": "9999px"
+        },
+        "spacing": {
+          "space-lg": "1.5rem",
+          "space-md": "1rem",
+          "gutter": "1.5rem",
+          "space-xl": "2.5rem",
+          "space-xs": "0.25rem",
+          "margin": "2rem",
+          "space-sm": "0.5rem"
+        },
+        "fontFamily": {
+          "body-sm": ["Inter", "sans-serif"],
+          "body-md": ["Inter", "sans-serif"],
+          "code-md": ["'JetBrains Mono'", "monospace"],
+          "headline-sm": ["Inter", "sans-serif"],
+          "headline-xl": ["Inter", "sans-serif"],
+          "body-lg": ["Inter", "sans-serif"],
+          "headline-md": ["Inter", "sans-serif"],
+          "headline-lg": ["Inter", "sans-serif"],
+          "label-md": ["Inter", "sans-serif"]
+        },
+        "fontSize": {
+          "body-sm": ["13px", {"lineHeight": "18px", "fontWeight": "400"}],
+          "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+          "code-md": ["13px", {"lineHeight": "20px", "fontWeight": "400"}],
+          "headline-sm": ["16px", {"lineHeight": "24px", "fontWeight": "600"}],
+          "headline-xl": ["30px", {"lineHeight": "38px", "letterSpacing": "-0.025em", "fontWeight": "600"}],
+          "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+          "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+          "headline-lg": ["22px", {"lineHeight": "30px", "letterSpacing": "-0.015em", "fontWeight": "600"}],
+          "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.04em", "fontWeight": "500"}]
+        }
+      }
+    }
+  }</script></head><body class="bg-[#f8fafc] font-body-md text-slate-900 antialiased selection:bg-slate-900 selection:text-white"><aside class="fixed left-0 top-0 h-full w-64 bg-slate-50 border-r border-slate-200 z-50 flex flex-col justify-between"><div class="flex flex-col"><div class="h-16 px-space-md flex items-center justify-between border-b border-slate-200/80"><div class="flex items-center gap-space-sm"><div class="w-7 h-7 rounded-lg bg-slate-900 flex items-center justify-center text-white font-headline-sm font-bold tracking-tight text-[13px]">R</div><span class="font-headline-sm text-slate-900 tracking-tight font-semibold text-[15px]">Resolvo</span><span class="px-1.5 py-0.5 bg-slate-200/60 text-slate-600 font-mono text-[10px] rounded font-medium">v2.4</span></div></div><div class="px-space-md py-3"><div class="p-2 bg-white rounded-lg border border-slate-200 shadow-xs flex items-center justify-between"><div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-500"></span><span class="text-[12px] font-medium text-slate-700">Operations Lead</span></div><span class="text-[10px] font-mono text-slate-600 uppercase px-1.5 py-0.5 bg-slate-100 rounded font-medium">Tier 3</span></div></div><div class="px-space-md mb-1"><span class="text-[11px] font-mono uppercase tracking-wider text-slate-600 font-semibold">Technical Console</span></div><nav class="flex flex-col gap-0.5 px-space-md"><a class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors text-[13px] font-medium" data-path="operations-overview" href="#"><span class="material-symbols-outlined text-[18px]">dashboard</span><span>Operations Overview</span></a><a aria-current="page" class="flex items-center gap-2.5 px-3 py-2 transition-colors bg-slate-200/70 text-slate-900 font-semibold rounded-lg text-[13px]" data-path="all-complaints" href="#"><span class="material-symbols-outlined text-[18px]">inbox</span><span>All Complaints</span></a><a class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors text-[13px] font-medium" data-path="ai-re-review-and-qa" href="#"><span class="material-symbols-outlined text-[18px]">fact_check</span><span>AI Re-Review &amp; QA</span></a><a class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors text-[13px] font-medium" data-path="sla-settings" href="#"><span class="material-symbols-outlined text-[18px]">timer</span><span>SLA Settings</span></a><a class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors text-[13px] font-medium" data-path="submit-and-intakes" href="#"><span class="material-symbols-outlined text-[18px]">post_add</span><span>Submit &amp; Intakes</span></a><a class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors text-[13px] font-medium" data-path="backup-and-export" href="#"><span class="material-symbols-outlined text-[18px]">cloud_download</span><span>Backup &amp; Export</span></a></nav></div><div class="p-space-md border-t border-slate-200"><div class="p-2 bg-white rounded-lg border border-slate-200 flex items-center justify-between"><div class="flex items-center gap-2"><span class="material-symbols-outlined text-slate-500 text-[16px]">shield</span><span class="text-[12px] font-medium text-slate-700">Audit Logging</span></div><span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 uppercase font-semibold">Active</span></div></div></aside><div class="pl-64 flex flex-col min-h-screen"><header class="fixed top-0 left-64 right-0 h-16 bg-white/95 backdrop-blur-md z-40 border-b border-slate-200"><div class="w-full h-full px-space-lg flex items-center justify-between gap-space-md"><div class="flex items-center gap-space-md flex-1 max-w-xl"><div class="relative w-full"><span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-600 text-[18px]">search</span><input class="w-full pl-9 pr-space-md py-1.5 bg-slate-50 border border-slate-200 rounded-lg font-body-sm text-slate-900 placeholder:text-slate-600 focus:outline-none focus:border-slate-400 focus:bg-white transition-all" placeholder="Search complaint ID, customer, SLA status, or keywords (Ctrl + K)..." type="text"/></div></div><div class="flex items-center gap-space-md"><div class="flex items-center gap-2 px-2.5 py-1 rounded-lg bg-slate-50 border border-slate-200 text-slate-700 text-[12px] font-mono"><span class="w-2 h-2 rounded-full bg-emerald-500"></span><span>HEARTBEAT: 99.98%</span></div><div class="flex items-center gap-1.5 text-slate-600 px-2.5 py-1 bg-slate-50 border border-slate-200 rounded-lg font-mono text-[12px]"><span class="material-symbols-outlined text-[15px]">schedule</span><span class="text-slate-800 font-medium">14:42:09 IST</span></div><button aria-label="Notifications" class="relative p-1.5 rounded-lg border border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors"><span class="material-symbols-outlined text-[18px]">notifications</span><span class="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-rose-500"></span></button><div class="flex items-center gap-2 pl-2 border-l border-slate-200"><div class="flex items-center gap-2.5 cursor-pointer group"><img alt="Profile" class="w-7 h-7 rounded-full border border-slate-200 object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDSpEr17LuJbNOqJ0rhuWgmqr3k9cRwDgZr01OOU4kAaKPPwieplzA3aCgMSjM2VsjfZiKSZvBNEPpDm1hOGN6RF__kCdMDyFzD7fhFFBqdDgzba5wuNpobA4OPD3kAMd0dXWxvzpfndHz_KduBTUHNnvN4dvi5mRzUfaqix3NV64XIqCrCKozVC6WDHX7Qa2GIZ5keselLnGhOYaklGWRsgWFukIhM_0pkN96Mr2654Oxdyyx6ADFf"/><div class="hidden xl:flex flex-col text-left"><span class="text-[13px] font-medium text-slate-900 leading-tight">Kavita Rao</span><span class="text-[11px] font-mono text-slate-600 leading-tight">Operations Manager</span></div><span class="material-symbols-outlined text-slate-600 group-hover:text-slate-900 text-[16px] transition-colors">arrow_drop_down</span></div></div></div></div></header><main class="relative w-full pt-16 bg-[#f8fafc] flex-1"><div class="flex flex-col w-full">
+<div class="max-w-7xl mx-auto w-full px-space-md lg:px-space-xl py-space-lg flex flex-col gap-5">
+<!-- Top Breadcrumb & Page Command Header -->
+<header class="flex flex-col gap-2.5">
+<!-- Breadcrumb Bar -->
+<nav class="flex items-center gap-1.5 text-slate-600 font-mono text-[12px]">
+<a class="flex items-center gap-1 hover:text-slate-900 transition-colors" href="#">
+<span class="material-symbols-outlined text-[15px]">inbox</span>
+<span>Complaints</span>
+</a>
+<span class="material-symbols-outlined text-[13px] text-slate-400">chevron_right</span>
+<span class="font-medium text-slate-900">DEF-8492</span>
+<span class="material-symbols-outlined text-[13px] text-slate-400">chevron_right</span>
+<span class="text-slate-600">Packaging &amp; Containment</span>
+</nav>
+<!-- Main Action Header -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-space-md bg-white p-5 lg:p-6 rounded-xl border border-slate-200">
+<div class="flex items-start md:items-center gap-3.5">
+<a aria-label="Return to Complaints" class="w-9 h-9 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-700 transition-colors shrink-0" href="#">
+<span class="material-symbols-outlined text-[18px]">arrow_back</span>
+</a>
+<div class="flex flex-col gap-1">
+<div class="flex flex-wrap items-center gap-2">
+<span class="font-mono text-[11px] font-semibold bg-slate-100 text-slate-800 px-2 py-0.5 rounded">#RES-8492</span>
+<span class="text-[11px] font-mono uppercase px-2 py-0.5 rounded bg-amber-50 text-amber-700 flex items-center gap-1.5 font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                In Progress
+              </span>
+<span class="font-mono text-[12px] text-slate-600 hidden sm:inline-block">/ Tier 1 Industrial Dispatch</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-slate-900 font-semibold tracking-tight">Defective Seal on Industrial Batch #409</h1>
+</div>
+</div>
+<!-- Quick Action CTAs -->
+<div class="flex items-center gap-2 self-end md:self-center">
+<button class="px-3 py-1.5 rounded-lg bg-white hover:bg-rose-50 text-rose-700 border border-slate-200 font-medium text-[13px] flex items-center gap-1.5 transition-colors" id="btn-delete">
+<span class="material-symbols-outlined text-[16px]">delete</span>
+<span>Delete</span>
+</button>
+<button class="px-3 py-1.5 rounded-lg bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-medium text-[13px] flex items-center gap-1.5 transition-colors" id="btn-export">
+<span class="material-symbols-outlined text-[16px]">file_download</span>
+<span>Export PDF</span>
+</button>
+<button class="px-3.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-medium text-[13px] flex items-center gap-1.5 transition-colors shadow-xs" id="btn-resolve">
+<span class="material-symbols-outlined text-[16px]">check_circle</span>
+<span>Mark Resolved</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Two-Column Asymmetrical Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+<!-- Primary Main Workspace (col-span-8) -->
+<main class="lg:col-span-8 flex flex-col gap-5 min-w-0">
+<!-- Complaint Description Card -->
+<article class="bg-white rounded-xl border border-slate-200 p-5 lg:p-6 flex flex-col gap-4">
+<div class="flex items-center justify-between pb-3 border-b border-slate-100">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-slate-600 text-[19px]">description</span>
+<h2 class="font-headline-sm text-slate-900 font-semibold tracking-tight text-[15px]">Complaint Transcript &amp; Intake Report</h2>
+</div>
+<span class="font-mono text-[11px] px-2 py-0.5 rounded bg-slate-100 text-slate-600 flex items-center gap-1 font-medium">
+<span class="material-symbols-outlined text-[13px]">graphic_eq</span>
+              Live Audio D2D Transcript
+            </span>
+</div>
+<div class="bg-slate-50 border border-slate-200/80 p-4 rounded-lg font-code-md text-code-md text-slate-700 flex flex-col gap-2.5">
+<p class="leading-relaxed">
+              “Upon receiving and staging pallet delivery at Bay 14 (Batch Ref: <span class="font-semibold text-slate-900 bg-slate-200/70 px-1 py-0.5 rounded font-mono">#LOT-409-CHEM</span>), our quality assurance technicians discovered severe vacuum breakdown along the thermal perimeter seal. Seal integrity failed across 42 of 60 drums inspected.”
+            </p>
+<p class="leading-relaxed">
+              “Chemical agent leakage is presently contained inside the tertiary poly-overpack, but the integrity envelope is compromised. High risk of oxidation if unsealed beyond 24 hours. Require immediate replacement inventory or batch certification clearance from Resolvo Operations before production halt occurs at 06:00 tomorrow.”
+            </p>
+</div>
+<!-- Technical Specs Visual Grid -->
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1">
+<div class="p-3 rounded-lg bg-slate-50 border border-slate-200/80 flex flex-col gap-1">
+<span class="font-mono text-[11px] uppercase tracking-wider text-slate-600 font-medium">Batch ID</span>
+<span class="font-mono text-[13px] font-semibold text-slate-900">LOT-409-CHEM</span>
+</div>
+<div class="p-3 rounded-lg bg-slate-50 border border-slate-200/80 flex flex-col gap-1">
+<span class="font-mono text-[11px] uppercase tracking-wider text-slate-600 font-medium">Failure Vector</span>
+<span class="font-mono text-[13px] font-semibold text-rose-700">Thermal Seam Rupture</span>
+</div>
+<div class="p-3 rounded-lg bg-slate-50 border border-slate-200/80 flex flex-col gap-1">
+<span class="font-mono text-[11px] uppercase tracking-wider text-slate-600 font-medium">Impact Volume</span>
+<span class="font-mono text-[13px] font-semibold text-slate-900">42 / 60 Units</span>
+</div>
+<div class="p-3 rounded-lg bg-slate-50 border border-slate-200/80 flex flex-col gap-1">
+<span class="font-mono text-[11px] uppercase tracking-wider text-slate-600 font-medium">Storage Facility</span>
+<span class="font-mono text-[13px] font-semibold text-slate-900">North Hub - B14</span>
+</div>
+</div>
+<!-- Metadata Footer -->
+<div class="pt-2 flex flex-wrap items-center justify-between gap-space-md text-slate-600 font-mono text-[12px] border-t border-slate-100">
+<div class="flex items-center gap-space-lg flex-wrap">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-slate-600">calendar_today</span>
+<span>Intake: Oct 24, 2024 at 10:18:42 IST</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-slate-600">badge</span>
+<span>Assigned: <strong class="text-slate-900 font-semibold">Sarah Jenkins</strong> (EMP-88214)</span>
+</div>
+</div>
+<div class="flex items-center gap-1.5 text-emerald-700 font-medium">
+<span class="material-symbols-outlined text-[16px]">verified_user</span>
+<span>SHA-256 Tamper Verified</span>
+</div>
+</div>
+</article>
+<!-- Resolvo AI Recommendation Engine Card -->
+<article class="bg-white rounded-xl border border-slate-200 p-5 lg:p-6 relative flex flex-col gap-4">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm pb-3 border-b border-slate-100">
+<div class="flex items-center gap-2.5">
+<div class="w-7 h-7 rounded-lg bg-slate-900 text-white flex items-center justify-center">
+<span class="material-symbols-outlined text-[16px]">smart_toy</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<span class="text-[11px] font-mono uppercase tracking-wider text-slate-900 font-semibold">Resolvo Engine</span>
+<span class="font-mono text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 font-medium">Neural-v4.1</span>
+</div>
+<h3 class="font-headline-sm text-slate-900 font-semibold text-[15px]">Recommended Remediation Action</h3>
+</div>
+</div>
+<div class="flex items-center gap-1.5 self-start sm:self-center px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 font-mono text-[11px] font-semibold">
+<span class="material-symbols-outlined text-[13px]">auto_awesome</span>
+<span>Confidence: 98.2%</span>
+</div>
+</div>
+<!-- Highlight Action Deck -->
+<div class="bg-slate-50 border border-slate-200/80 p-4 rounded-lg flex flex-col gap-2">
+<div class="flex items-center gap-2 text-slate-900 font-semibold text-[13.5px]">
+<span class="material-symbols-outlined text-[17px] text-slate-700">emergency_home</span>
+<span>Issue Immediate Batch Recall &amp; Priority Dispatch Replacement Unit within 12h</span>
+</div>
+<p class="font-body-md text-slate-700 leading-relaxed text-[13.5px]">
+              Based on historical compliance regulations for Class-3 industrial packaging failures and customer tier parameters, immediate quarantine of Bay 14 stock prevents catastrophic oxidation. Resolvo AI has staged warehouse voucher <code class="bg-white px-1.5 py-0.5 rounded border border-slate-200 font-mono text-[12px] font-semibold text-slate-900">#WH-DISP-9921</code> for emergency release from the Frankfurt Distribution Depot.
+            </p>
+</div>
+<!-- Action Rationale Visual Nodes -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-2.5">
+<div class="p-3 rounded-lg bg-slate-50 border border-slate-200/80 flex flex-col gap-1">
+<div class="flex items-center gap-1.5 text-slate-600 font-mono text-[11px]">
+<span class="material-symbols-outlined text-[15px]">history_edu</span>
+<span class="uppercase tracking-wider">Precedent Match</span>
+</div>
+<span class="font-body-sm font-semibold text-slate-900">14 Similar Cases (99.1% Win Rate)</span>
+</div>
+<div class="p-3 rounded-lg bg-slate-50 border border-slate-200/80 flex flex-col gap-1">
+<div class="flex items-center gap-1.5 text-slate-600 font-mono text-[11px]">
+<span class="material-symbols-outlined text-[15px]">price_change</span>
+<span class="uppercase tracking-wider">Financial Exposure</span>
+</div>
+<span class="font-body-sm font-semibold text-rose-700">$38,400 SLA Penalty Offset</span>
+</div>
+<div class="p-3 rounded-lg bg-slate-50 border border-slate-200/80 flex flex-col gap-1">
+<div class="flex items-center gap-1.5 text-slate-600 font-mono text-[11px]">
+<span class="material-symbols-outlined text-[15px]">bolt</span>
+<span class="uppercase tracking-wider">Auto-Approval Status</span>
+</div>
+<span class="font-body-sm font-semibold text-emerald-700">Pre-authorized via Rule #88B</span>
+</div>
+</div>
+<!-- Execution Bar -->
+<div class="flex items-center justify-between pt-2 flex-wrap gap-space-sm border-t border-slate-100">
+<span class="font-mono text-[11px] text-slate-600">Generated under ISO-9001 compliance standards</span>
+<div class="flex items-center gap-2">
+<button class="px-3 py-1.5 rounded-lg bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-medium text-[13px] transition-colors">
+                Modify Logic
+              </button>
+<button class="px-3.5 py-1.5 rounded-lg bg-slate-900 text-white hover:bg-slate-800 font-medium text-[13px] transition-colors flex items-center gap-1.5 shadow-xs">
+<span class="material-symbols-outlined text-[16px]">done_all</span>
+<span>Accept Recommendation</span>
+</button>
+</div>
+</div>
+</article>
+<!-- Activity & Audit Timeline Card -->
+<article class="bg-white rounded-xl border border-slate-200 p-5 lg:p-6 flex flex-col gap-4">
+<div class="flex items-center justify-between pb-3 border-b border-slate-100">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-slate-600 text-[19px]">manage_history</span>
+<h3 class="font-headline-sm text-slate-900 font-semibold tracking-tight text-[15px]">Activity &amp; Operational Audit Trail</h3>
+</div>
+<span class="font-mono text-[11px] text-slate-600 flex items-center gap-1.5 font-medium"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Real-time sync</span>
+</div>
+<!-- Vertical Stepper Track -->
+<div class="relative pl-6 flex flex-col gap-5 py-1">
+<!-- Continuous Line -->
+<div class="absolute left-2.5 top-3 bottom-3 w-px bg-slate-200"></div>
+<!-- Item 1: Submitted -->
+<div class="relative flex items-start gap-3.5 group">
+<div class="absolute -left-6 top-0.5 w-5 h-5 rounded-full bg-emerald-50 text-emerald-700 flex items-center justify-center ring-4 ring-white">
+<span class="material-symbols-outlined text-[12px] font-bold">check</span>
+</div>
+<div class="flex flex-col gap-0.5">
+<div class="flex items-center gap-2">
+<span class="text-[13px] text-slate-900 font-semibold">Complaint Ticket Created &amp; Ingested</span>
+<span class="font-mono text-[10px] uppercase bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-medium">Automated</span>
+</div>
+<p class="text-[13px] text-slate-600">Captured via Live Voice D2D Stream. Assigned to Tier-1 Triage Queue.</p>
+<span class="font-mono text-[11px] text-slate-600 mt-0.5">Oct 24, 2024 • 10:18:42 IST</span>
+</div>
+</div>
+<!-- Item 2: Auto Classified -->
+<div class="relative flex items-start gap-3.5 group">
+<div class="absolute -left-6 top-0.5 w-5 h-5 rounded-full bg-emerald-50 text-emerald-700 flex items-center justify-center ring-4 ring-white">
+<span class="material-symbols-outlined text-[12px] font-bold">check</span>
+</div>
+<div class="flex flex-col gap-0.5">
+<div class="flex items-center gap-2">
+<span class="text-[13px] text-slate-900 font-semibold">AI Auto-Classification &amp; Priority Weighting</span>
+<span class="font-mono text-[10px] uppercase px-1.5 py-0.5 bg-rose-50 text-rose-700 rounded font-semibold">High Priority</span>
+</div>
+<p class="text-[13px] text-slate-600">Detected category: Packaging &amp; Containment. SLA benchmark calculated at 18h maximum turnaround.</p>
+<span class="font-mono text-[11px] text-slate-600 mt-0.5">Oct 24, 2024 • 10:19:04 IST</span>
+</div>
+</div>
+<!-- Item 3: QA Audit Check -->
+<div class="relative flex items-start gap-3.5 group">
+<div class="absolute -left-6 top-0.5 w-5 h-5 rounded-full bg-emerald-50 text-emerald-700 flex items-center justify-center ring-4 ring-white">
+<span class="material-symbols-outlined text-[12px] font-bold">check</span>
+</div>
+<div class="flex flex-col gap-0.5">
+<div class="flex items-center gap-2">
+<span class="text-[13px] text-slate-900 font-semibold">QA Automated Diagnostic Pass</span>
+<span class="font-mono text-[10px] text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded font-semibold">98.2% Confidence</span>
+</div>
+<p class="text-[13px] text-slate-600">Batch record LOT-409 validated against manufacturing lot repository. Cross-checked with sensor log thermals.</p>
+<span class="font-mono text-[11px] text-slate-600 mt-0.5">Oct 24, 2024 • 10:21:11 IST</span>
+</div>
+</div>
+<!-- Item 4: Escalation to Quality Lead -->
+<div class="relative flex items-start gap-3.5 group">
+<div class="absolute -left-6 top-0.5 w-5 h-5 rounded-full bg-slate-900 text-white flex items-center justify-center ring-4 ring-white">
+<span class="material-symbols-outlined text-[12px] font-bold">arrow_upward</span>
+</div>
+<div class="flex flex-col gap-0.5">
+<div class="flex items-center gap-2">
+<span class="text-[13px] text-slate-900 font-semibold">Escalated to Quality Engineering Lead</span>
+<span class="font-mono text-[10px] uppercase px-1.5 py-0.5 bg-rose-50 text-rose-700 rounded font-semibold">Escalated</span>
+</div>
+<p class="text-[13px] text-slate-600">Assigned to Sarah Jenkins (EMP-88214) due to risk of production line shutdown.</p>
+<span class="font-mono text-[11px] text-slate-600 mt-0.5">Oct 24, 2024 • 10:35:00 IST</span>
+</div>
+</div>
+<!-- Item 5: In Review (Active Pending Milestone) -->
+<div class="relative flex items-start gap-3.5 group">
+<div class="absolute -left-6 top-0.5 w-5 h-5 rounded-full bg-amber-50 text-amber-700 border border-amber-300 flex items-center justify-center ring-4 ring-white">
+<span class="w-1.5 h-1.5 rounded-full bg-amber-600 animate-pulse"></span>
+</div>
+<div class="flex flex-col gap-0.5">
+<div class="flex items-center gap-2">
+<span class="text-[13px] text-slate-900 font-bold">Currently in Review &amp; Dispatch Confirmation</span>
+<span class="font-mono text-[10px] uppercase px-1.5 py-0.5 bg-amber-50 text-amber-700 rounded font-semibold">Active Stage</span>
+</div>
+<p class="text-[13px] text-slate-600">Awaiting logistics coordination with Frankfurt depot for courier handover.</p>
+<span class="font-mono text-[11px] text-slate-600 mt-0.5">Updated 4 mins ago</span>
+</div>
+</div>
+<!-- Item 6: Resolved Milestone (Target State) -->
+<div class="relative flex items-start gap-3.5 opacity-40">
+<div class="absolute -left-6 top-0.5 w-5 h-5 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center ring-4 ring-white">
+<span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
+</div>
+<div class="flex flex-col gap-0.5">
+<span class="text-[13px] text-slate-600 font-medium">Final Resolution &amp; Customer Sign-off</span>
+<span class="text-[12px] text-slate-600">Pending completion of dispatch voucher</span>
+</div>
+</div>
+</div>
+</article>
+</main>
+<!-- Contextual Sidebar Rail (col-span-4) -->
+<aside class="lg:col-span-4 flex flex-col gap-5">
+<!-- SLA Tracking Card -->
+<section class="bg-white rounded-xl border border-slate-200 p-5 lg:p-6 flex flex-col gap-4">
+<div class="flex items-center justify-between pb-3 border-b border-slate-100">
+<div class="flex items-center gap-2 text-slate-800">
+<span class="material-symbols-outlined text-[18px] text-slate-600">timer</span>
+<h3 class="font-mono text-[11px] font-semibold uppercase tracking-wider text-slate-700">SLA Resolution Target</h3>
+</div>
+<span class="font-mono text-[10px] uppercase px-2 py-0.5 rounded bg-rose-50 text-rose-700 font-semibold">High Priority</span>
+</div>
+<!-- Countdown Big Metric Hero Box -->
+<div class="bg-slate-50 border border-slate-200/80 p-4 rounded-lg flex items-center gap-3.5">
+<div class="w-10 h-10 rounded-lg bg-slate-900 text-white flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[20px]">schedule</span>
+</div>
+<div class="flex flex-col">
+<span class="font-headline-xl text-headline-xl text-slate-900 font-bold tracking-tight font-mono" id="sla-countdown">14h 22m</span>
+<span class="font-mono text-[11px] text-slate-600 uppercase tracking-wider">Time Remaining until breach</span>
+</div>
+</div>
+<!-- SLA Breakdown Rows (Structured Metadata Key-Value) -->
+<div class="flex flex-col text-[13px]">
+<div class="flex items-center justify-between py-2 border-b border-slate-100">
+<span class="font-mono text-[12px] text-slate-600">Target Resolution SLA</span>
+<span class="font-mono text-[12px] font-semibold text-slate-900">18 Hours Total</span>
+</div>
+<div class="flex items-center justify-between py-2 border-b border-slate-100">
+<span class="font-mono text-[12px] text-slate-600">Breach Deadline</span>
+<span class="font-mono text-[12px] font-semibold text-slate-900">Oct 25, 2024 • 04:18:00 IST</span>
+</div>
+<div class="flex items-center justify-between py-2 border-b border-slate-100">
+<span class="font-mono text-[12px] text-slate-600">Current Breach Status</span>
+<span class="font-mono text-[11px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded font-semibold flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                Within bounds
+              </span>
+</div>
+<div class="flex items-center justify-between py-2">
+<span class="font-mono text-[12px] text-slate-600">Escalation Level</span>
+<span class="font-mono text-[12px] text-rose-700 font-semibold">Tier 3 (Executive Alert)</span>
+</div>
+</div>
+<!-- Micro SLA Progress Bar -->
+<div class="flex flex-col gap-1.5 pt-2 border-t border-slate-100">
+<div class="flex justify-between font-mono text-[10px] text-slate-600 uppercase">
+<span>Elapsed: 3h 38m</span>
+<span>79.8% Remaining</span>
+</div>
+<div class="w-full h-1.5 rounded-full bg-slate-100 overflow-hidden">
+<div class="h-full bg-slate-900 rounded-full transition-all duration-500" style="width: 20.2%;"></div>
+</div>
+</div>
+</section>
+<!-- Operational Insights & Sentiment Card -->
+<section class="bg-white rounded-xl border border-slate-200 p-5 lg:p-6 flex flex-col gap-4">
+<div class="flex items-center justify-between pb-3 border-b border-slate-100">
+<div class="flex items-center gap-2 text-slate-800">
+<span class="material-symbols-outlined text-[18px] text-slate-600">insights</span>
+<h3 class="font-mono text-[11px] font-semibold uppercase tracking-wider text-slate-700">Operational Insights</h3>
+</div>
+<span class="font-mono text-[10px] uppercase bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-medium">Telemetry</span>
+</div>
+<!-- Sentiment Meter -->
+<div class="flex flex-col gap-2 p-3 rounded-lg bg-slate-50 border border-slate-200/80">
+<div class="flex items-center justify-between">
+<span class="font-mono text-[11px] text-slate-600 uppercase tracking-wider font-medium">Detected Sentiment</span>
+<span class="font-mono text-[11px] text-rose-700 font-bold">-0.78 Frustrated / Urgent</span>
+</div>
+<div class="flex items-center gap-2.5 pt-1">
+<span class="material-symbols-outlined text-rose-600 text-[18px]">sentiment_very_dissatisfied</span>
+<div class="flex-1 flex flex-col gap-1">
+<div class="w-full h-1.5 rounded-full bg-slate-200 overflow-hidden flex">
+<div class="bg-rose-500 h-full rounded-full" style="width: 78%;"></div>
+</div>
+<div class="flex justify-between font-mono text-[10px] text-slate-600">
+<span>Extreme Friction</span>
+<span>Neutral</span>
+<span>Positive</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Categorization Tags Deck -->
+<div class="flex flex-col gap-2">
+<span class="font-mono text-[11px] uppercase tracking-wider text-slate-600 font-medium">Taxonomy Classifications</span>
+<div class="flex flex-wrap gap-1.5">
+<span class="font-mono text-[11px] px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-medium">#Packaging</span>
+<span class="font-mono text-[11px] px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-medium">#Factory-Batch</span>
+<span class="font-mono text-[11px] px-2 py-0.5 rounded bg-rose-50 text-rose-700 font-medium">#High-Risk</span>
+<span class="font-mono text-[11px] px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-medium">#Chemical-Containment</span>
+<span class="font-mono text-[11px] px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-medium">#Tier1-Client</span>
+</div>
+</div>
+<!-- Customer Profile Summary -->
+<div class="flex flex-col gap-2 pt-2 border-t border-slate-100">
+<span class="font-mono text-[11px] uppercase tracking-wider text-slate-600 font-medium">Account Overview</span>
+<div class="flex items-center gap-3 p-2.5 rounded-lg bg-slate-50 border border-slate-200/80">
+<div class="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center font-mono text-[12px] font-bold">
+                AC
+              </div>
+<div class="flex flex-col min-w-0 flex-1">
+<span class="text-[13px] font-semibold text-slate-900 truncate">Apex Chemicals Corp</span>
+<span class="font-mono text-[11px] text-slate-600 truncate">Enterprise Gold SLA • #AC-9902</span>
+</div>
+<span class="font-mono text-[10px] uppercase bg-emerald-50 text-emerald-700 px-1.5 py-0.5 rounded font-semibold">Active</span>
+</div>
+<div class="grid grid-cols-2 gap-2 font-mono text-[11px] text-slate-600 pt-1">
+<div class="p-2 bg-slate-50 border border-slate-200/80 rounded-lg">Incidents YTD: <strong class="text-slate-900">3</strong></div>
+<div class="p-2 bg-slate-50 border border-slate-200/80 rounded-lg">Mean Res: <strong class="text-slate-900">4.2h</strong></div>
+<div class="p-2 bg-slate-50 border border-slate-200/80 rounded-lg">Renewal: <strong class="text-slate-900">Nov 2025</strong></div>
+<div class="p-2 bg-slate-50 border border-slate-200/80 rounded-lg">Lead: <strong class="text-slate-900">V. Sharma</strong></div>
+</div>
+</div>
+</section>
+<!-- Quick Access Documentation Attachments -->
+<section class="bg-white rounded-xl border border-slate-200 p-5 lg:p-6 flex flex-col gap-3">
+<div class="flex items-center justify-between pb-3 border-b border-slate-100">
+<span class="font-mono text-[11px] font-semibold uppercase tracking-wider text-slate-700">Associated Records</span>
+<span class="font-mono text-[10px] text-slate-600 uppercase font-medium">2 Files</span>
+</div>
+<a class="flex items-center justify-between p-2.5 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200/80 transition-colors group" href="#">
+<div class="flex items-center gap-2.5">
+<span class="material-symbols-outlined text-[18px] text-slate-600 group-hover:text-slate-900">description</span>
+<div class="flex flex-col">
+<span class="text-[12px] font-mono text-slate-800 font-semibold group-hover:text-slate-900 transition-colors">Drum_Thermal_Scan_409.pdf</span>
+<span class="font-mono text-[10px] text-slate-600">2.4 MB • Sensor Log</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-slate-600 group-hover:text-slate-900 text-[16px]">download</span>
+</a>
+<a class="flex items-center justify-between p-2.5 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200/80 transition-colors group" href="#">
+<div class="flex items-center gap-2.5">
+<span class="material-symbols-outlined text-[18px] text-slate-600 group-hover:text-slate-900">mic</span>
+<div class="flex flex-col">
+<span class="text-[12px] font-mono text-slate-800 font-semibold group-hover:text-slate-900 transition-colors">Bay14_Voice_Dispatch_Raw.wav</span>
+<span class="font-mono text-[10px] text-slate-600">840 KB • Audio Clip</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-slate-600 group-hover:text-slate-900 text-[16px]">play_circle</span>
+</a>
+</section>
+</aside>
+</div>
+</div>
+</div>
+<script>
+  // Simple interactive handlers for SLA resolution workbench actions
+  document.getElementById('btn-resolve')?.addEventListener('click', function() {
+    const confirmed = confirm('Mark Complaint #RES-8492 as Resolved and finalize the audit log?');
+    if (confirmed) {
+      this.classList.remove('bg-slate-900', 'hover:bg-slate-800');
+      this.classList.add('bg-emerald-700', 'text-white');
+      this.innerHTML = '<span class="material-symbols-outlined text-[16px]">check_circle</span><span>Resolved</span>';
+      
+      const badge = document.querySelector('.bg-amber-50');
+      if (badge) {
+        badge.className = 'text-[11px] font-mono uppercase px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 flex items-center gap-1.5 font-semibold';
+        badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Resolved';
+      }
+      
+      const countdown = document.getElementById('sla-countdown');
+      if (countdown) {
+        countdown.textContent = 'RESOLVED';
+        countdown.className = 'font-headline-xl text-headline-xl text-emerald-700 font-bold tracking-tight font-mono';
+      }
+    }
+  });
+
+  document.getElementById('btn-delete')?.addEventListener('click', function() {
+    confirm('Are you sure you want to delete #RES-8492? This action triggers a compliance audit trail.');
+  });
+
+  document.getElementById('btn-export')?.addEventListener('click', function() {
+    const originalText = this.innerHTML;
+    this.innerHTML = '<span class="material-symbols-outlined text-[16px] animate-spin">refresh</span><span>Generating...</span>';
+    setTimeout(() => {
+      this.innerHTML = '<span class="material-symbols-outlined text-[16px]">done</span><span>Downloaded</span>';
+      setTimeout(() => {
+        this.innerHTML = originalText;
+      }, 2000);
+    }, 1200);
+  });
+</script></main></div></body></html>

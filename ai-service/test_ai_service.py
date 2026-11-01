@@ -167,9 +167,11 @@ def test_gpt_oss_service():
 
     # Test robust JSON extraction helper
     valid_json = service._extract_json('```json\n{"recommendation": "Check batch", "is_resolvable_by_ai": false}\n```')
+    assert valid_json is not None
     assert valid_json["is_resolvable_by_ai"] is False
 
     malformed_json = service._extract_json('Some text before {"recommendation": "Replace", "is_resolvable_by_ai": true} and text after')
+    assert malformed_json is not None
     assert malformed_json["recommendation"] == "Replace"
     print("✓ PASS: GPT-OSS service tests (Actionable recommendations, AI decision, JSON parser)")
 

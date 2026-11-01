@@ -21,7 +21,9 @@ from typing import Dict, Any, List
 
 if sys.platform == "win32":
     try:
-        sys.stdout.reconfigure(encoding="utf-8")
+        reconfigure = getattr(sys.stdout, "reconfigure", None)
+        if callable(reconfigure):
+            reconfigure(encoding="utf-8")
     except Exception:
         pass
 from fastapi.testclient import TestClient

@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script><script id="tailwind-config">tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        fontFamily: {
+          sans: ["Inter", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "sans-serif"],
+          mono: ["JetBrains Mono", "monospace"]
+        },
+        colors: {
+          slate: {
+            25: "#fcfdfd",
+            50: "#f8fafc",
+            100: "#f1f5f9",
+            200: "#e2e8f0",
+            300: "#cbd5e1",
+            400: "#94a3b8",
+            500: "#64748b",
+            600: "#475569",
+            700: "#334155",
+            800: "#1e293b",
+            900: "#0f172a"
+          }
+        },
+        borderRadius: {
+          'xl': '0.75rem',
+          '2xl': '1rem'
+        }
+      }
+    }
+  }</script></head><body class="bg-[#f8fafc] font-sans text-slate-900 antialiased selection:bg-slate-900 selection:text-white flex min-h-screen">
+<!-- Left Sidebar (Clean Stripe/Linear subtle slate-50 styling) -->
+<aside class="fixed left-0 top-0 h-full w-64 bg-slate-50 border-r border-slate-200 z-50 flex flex-col justify-between select-none">
+<div class="flex flex-col">
+<!-- App Brand -->
+<div class="h-16 px-5 flex items-center justify-between border-b border-slate-200/80">
+<div class="flex items-center gap-2.5">
+<div class="w-7 h-7 rounded-lg bg-slate-900 flex items-center justify-center text-white shadow-sm">
+<span class="font-bold text-sm tracking-tight font-sans">R</span>
+</div>
+<span class="font-semibold text-slate-900 text-[15px] tracking-tight">Resolvo</span>
+</div>
+<span class="px-1.5 py-0.5 bg-slate-200/60 text-slate-600 font-mono text-[10px] font-medium rounded">v2.4</span>
+</div>
+<!-- Current Role Pill -->
+<div class="px-4 py-3">
+<div class="px-3 py-2 bg-white border border-slate-200 rounded-lg flex items-center justify-between shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+<div class="flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+<span class="text-xs text-slate-700 font-medium">Operations Lead</span>
+</div>
+<span class="font-mono text-[10px] text-slate-500 font-medium uppercase px-1.5 py-0.5 bg-slate-100 rounded">Tier 3</span>
+</div>
+</div>
+<!-- Section Label -->
+<div class="px-5 mt-2 mb-1.5">
+<span class="font-mono text-[11px] uppercase tracking-wider text-slate-400 font-medium">Navigation</span>
+</div>
+<!-- Nav Items -->
+<nav class="flex flex-col gap-0.5 px-3">
+<a aria-current="page" class="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-slate-200/70 text-slate-900 font-medium text-[13px] transition-colors" data-path="operations-overview" href="#">
+<span class="material-symbols-outlined text-[18px] text-slate-800">dashboard</span>
+<span>Operations Overview</span>
+</a>
+<a class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 transition-colors text-[13px]" data-path="all-complaints" href="#">
+<span class="material-symbols-outlined text-[18px] text-slate-500">inbox</span>
+<span>All Complaints</span>
+</a>
+<a class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 transition-colors text-[13px]" data-path="ai-re-review-and-qa" href="#">
+<span class="material-symbols-outlined text-[18px] text-slate-500">fact_check</span>
+<span>AI Re-Review &amp; QA</span>
+</a>
+<a class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 transition-colors text-[13px]" data-path="sla-settings" href="#">
+<span class="material-symbols-outlined text-[18px] text-slate-500">timer</span>
+<span>SLA Settings</span>
+</a>
+<a class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 transition-colors text-[13px]" data-path="submit-and-intakes" href="#">
+<span class="material-symbols-outlined text-[18px] text-slate-500">post_add</span>
+<span>Submit &amp; Intakes</span>
+</a>
+<a class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 transition-colors text-[13px]" data-path="backup-and-export" href="#">
+<span class="material-symbols-outlined text-[18px] text-slate-500">cloud_download</span>
+<span>Backup &amp; Export</span>
+</a>
+</nav>
+</div>
+<!-- Bottom Sidebar Status -->
+<div class="p-4 border-t border-slate-200/80">
+<div class="px-3 py-2 bg-white border border-slate-200 rounded-lg flex items-center justify-between shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-slate-400 text-[17px]">shield</span>
+<span class="text-xs text-slate-600 font-medium">Audit Logging</span>
+</div>
+<span class="font-mono text-[10px] px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 font-medium uppercase">Active</span>
+</div>
+</div>
+</aside>
+<!-- Main Content Layout -->
+<div class="pl-64 flex flex-col flex-1 w-full min-h-screen">
+<!-- Top Header -->
+<header class="fixed top-0 left-64 right-0 h-16 bg-white/90 backdrop-blur-md z-40 border-b border-slate-200">
+<div class="w-full h-full px-6 flex items-center justify-between gap-4">
+<!-- Search Input -->
+<div class="flex items-center gap-3 flex-1 max-w-lg">
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">search</span>
+<input class="w-full pl-9 pr-12 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-[13px] text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-slate-400 focus:bg-white transition-all shadow-[0_1px_2px_rgba(0,0,0,0.02)]" placeholder="Search complaint ID, customer, SLA status, or keywords..." type="text"/>
+<span class="absolute right-2.5 top-1/2 -translate-y-1/2 font-mono text-[10px] text-slate-400 px-1.5 py-0.5 rounded bg-slate-200/50">⌘K</span>
+</div>
+</div>
+<!-- Header Actions / User -->
+<div class="flex items-center gap-3">
+<!-- Heartbeat -->
+<div class="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 font-mono text-[11px] font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+<span>Heartbeat: 99.98%</span>
+</div>
+<!-- IST Time -->
+<div class="hidden md:flex items-center gap-1.5 text-slate-600 px-2.5 py-1 bg-slate-50 border border-slate-200 rounded-md">
+<span class="material-symbols-outlined text-[14px] text-slate-400">schedule</span>
+<span class="font-mono text-xs font-medium text-slate-700">14:42:09 IST</span>
+</div>
+<!-- Notification -->
+<button aria-label="Notifications" class="relative p-1.5 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors">
+<span class="material-symbols-outlined text-[20px]">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-rose-500 ring-2 ring-white"></span>
+</button>
+<!-- Profile -->
+<div class="flex items-center gap-2 pl-2 border-l border-slate-200">
+<div class="flex items-center gap-2.5 cursor-pointer py-1 px-1.5 rounded-lg hover:bg-slate-100/70 transition-colors">
+<img alt="Profile" class="w-7 h-7 rounded-full border border-slate-200 object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDSpEr17LuJbNOqJ0rhuWgmqr3k9cRwDgZr01OOU4kAaKPPwieplzA3aCgMSjM2VsjfZiKSZvBNEPpDm1hOGN6RF__kCdMDyFzD7fhFFBqdDgzba5wuNpobA4OPD3kAMd0dXWxvzpfndHz_KduBTUHNnvN4dvi5mRzUfaqix3NV64XIqCrCKozVC6WDHX7Qa2GIZ5keselLnGhOYaklGWRsgWFukIhM_0pkN96Mr2654Oxdyyx6ADFf"/>
+<div class="hidden xl:flex flex-col text-left">
+<span class="text-xs text-slate-900 font-semibold leading-tight">Kavita Rao</span>
+<span class="text-[11px] text-slate-500 leading-tight">Operations Manager</span>
+</div>
+<span class="material-symbols-outlined text-slate-400 text-[16px]">expand_more</span>
+</div>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Content Body -->
+<main class="relative w-full pt-16 flex-1">
+<div class="flex flex-col w-full p-6 lg:p-8 gap-6 max-w-7xl mx-auto">
+<!-- Header Banner -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-1">
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-2.5">
+<h1 class="text-2xl font-bold text-slate-900 tracking-tight">Operations Overview</h1>
+<span class="px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-mono text-[10px] uppercase font-semibold tracking-wider">Ops Console</span>
+</div>
+<p class="text-sm text-slate-500">
+              Real-time telemetry and SLA governance for <span class="font-medium text-slate-800">Resolvo</span> complaint resolution pipelines.
+            </p>
+</div>
+<!-- Top Controls -->
+<div class="flex items-center gap-2.5">
+<div class="flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 rounded-lg shadow-sm text-xs font-medium text-slate-700">
+<span class="relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-60"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+</span>
+<span>Live Data (IST)</span>
+<span class="font-mono text-[11px] text-slate-400 font-normal">• 30s refresh</span>
+</div>
+<button class="flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 text-white rounded-lg text-xs font-semibold shadow-sm hover:bg-slate-800 active:scale-[0.98] transition-all" id="refreshBtn">
+<span class="material-symbols-outlined text-[15px] transition-transform duration-500" id="refreshIcon">sync</span>
+<span>Sync</span>
+</button>
+</div>
+</div>
+<!-- 8 KPI Cards Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+<!-- 1. Total Complaints -->
+<div class="p-5 bg-white border border-slate-200 rounded-xl shadow-sm flex items-center justify-between">
+<div class="flex flex-col gap-1">
+<span class="text-[11px] text-slate-500 uppercase tracking-wider font-semibold">Total Complaints</span>
+<div class="flex items-baseline gap-2">
+<span class="text-2xl font-bold text-slate-900 font-mono">142</span>
+<div class="flex items-center text-emerald-600 font-mono text-xs font-medium">
+<span class="material-symbols-outlined text-[13px]">arrow_outward</span>
+<span>+12%</span>
+</div>
+</div>
+<span class="font-mono text-[11px] text-slate-400">142 total recorded</span>
+</div>
+<div class="w-10 h-10 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-600">
+<span class="material-symbols-outlined text-[20px]">group</span>
+</div>
+</div>
+<!-- 2. Open Cases -->
+<div class="p-5 bg-white border border-slate-200 rounded-xl shadow-sm flex items-center justify-between">
+<div class="flex flex-col gap-1">
+<span class="text-[11px] text-slate-500 uppercase tracking-wider font-semibold">Open Cases</span>
+<div class="flex items-baseline gap-2">
+<span class="text-2xl font-bold text-slate-900 font-mono">19</span>
+<span class="px-1.5 py-0.5 rounded bg-rose-50 text-rose-700 font-mono text-[10px] uppercase font-semibold">Action req.</span>
+</div>
+<span class="font-mono text-[11px] text-rose-600 font-medium">Needs attention</span>
+</div>
+<div class="w-10 h-10 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-600">
+<span class="material-symbols-outlined text-[20px]">report_problem</span>
+</div>
+</div>
+<!-- 3. Resolved -->
+<div class="p-5 bg-white border border-slate-200 rounded-xl shadow-sm flex items-center justify-between">
+<div class="flex flex-col gap-1">
+<span class="text-[11px] text-slate-500 uppercase tracking-wider font-semibold">Resolved</span>
+<div class="flex items-baseline gap-2">
+<span class="text-2xl font-bold text-slate-900 font-mono">118</span>
+<span class="font-mono text-xs text-emerald-600 font-semibold">83.1%</span>
+</div>
+<span class="font-mono text-[11px] text-emerald-700 font-medium">Completed stream</span>
+</div>
+<div class="w-10 h-10 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-600">
+<span class="material-symbols-outlined text-[20px]">check_circle</span>
+</div>
+</div>
+<!-- 4. Avg. Resolution -->
+<div class="p-5 bg-white border border-slate-200 rounded-xl shadow-sm flex items-center justify-between">
+<div class="flex flex-col gap-1">
+<span class="text-[11px] text-slate-500 uppercase tracking-wider font-semibold">Avg. Resolution</span>
+<div class="flex items-baseline gap-2">
+<span class="text-2xl font-bold text-slate-900 font-mono">16.4<span class="text-xs font-normal text-slate-400 ml-0.5">h</span></span>
+<div class="flex items-center text-emerald-600 font-mono text-xs font-medium">
+<span class="material-symbols-outlined text-[13px]">arrow_downward</span>
+<span>-2.1h</span>
+</div>
+</div>
+<span class="font-mono text-[11px] text-slate-400">Target: &lt; 24.0h</span>
+</div>
+<div class="w-10 h-10 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-600">
+<span class="material-symbols-outlined text-[20px]">schedule</span>
+</div>
+</div>
+<!-- 5. SLA Breached -->
+<div class="p-5 bg-white border border-slate-200 rounded-xl shadow-sm flex items-center justify-between">
+<div class="flex flex-col gap-1">
+<span class="text-[11px] text-slate-500 uppercase tracking-wider font-semibold">SLA Breached</span>
+<div class="flex items-baseline gap-2">
+<span class="text-2xl font-bold text-slate-900 font-mono">5</span>
+<span class="px-1.5 py-0.5 rounded bg-rose-50 text-rose-700 font-mono text-[10px] uppercase font-semibold">Overdue</span>
+</div>
+<span class="font-mono text-[11px] text-rose-600 font-medium">Immediate triage</span>
+</div>
+<div class="w-10 h-10 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-600">
+<span class="material-symbols-outlined text-[20px]">gpp_bad</span>
+</div>
+</div>
+<!-- 6. Escalated -->
+<div class="p-5 bg-white border border-slate-200 rounded-xl shadow-sm flex items-center justify-between">
+<div class="flex flex-col gap-1">
+<span class="text-[11px] text-slate-500 uppercase tracking-wider font-semibold">Escalated</span>
+<div class="flex items-baseline gap-2">
+<span class="text-2xl font-bold text-slate-900 font-mono">8</span>
+<span class="px-1.5 py-0.5 rounded bg-purple-50 text-purple-700 font-mono text-[10px] uppercase font-semibold">Tier 3</span>
+</div>
+<span class="font-mono text-[11px] text-purple-700 font-medium">Manual intervention</span>
+</div>
+<div class="w-10 h-10 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-600">
+<span class="material-symbols-outlined text-[20px]">crisis_alert</span>
+</div>
+</div>
+<!-- 7. In Progress -->
+<div class="p-5 bg-white border border-slate-200 rounded-xl shadow-sm flex items-center justify-between">
+<div class="flex flex-col gap-1">
+<span class="text-[11px] text-slate-500 uppercase tracking-wider font-semibold">In Progress</span>
+<div class="flex items-baseline gap-2">
+<span class="text-2xl font-bold text-slate-900 font-mono">11</span>
+<span class="px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 font-mono text-[10px] uppercase font-semibold">Active</span>
+</div>
+<span class="font-mono text-[11px] text-slate-400">Investigation stream</span>
+</div>
+<div class="w-10 h-10 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-600">
+<span class="material-symbols-outlined text-[20px]">published_with_changes</span>
+</div>
+</div>
+<!-- 8. High Priority Open -->
+<div class="p-5 bg-white border border-slate-200 rounded-xl shadow-sm flex items-center justify-between">
+<div class="flex flex-col gap-1">
+<span class="text-[11px] text-slate-500 uppercase tracking-wider font-semibold">High Priority Open</span>
+<div class="flex items-baseline gap-2">
+<span class="text-2xl font-bold text-slate-900 font-mono">3</span>
+<span class="px-1.5 py-0.5 rounded bg-rose-50 text-rose-700 font-mono text-[10px] uppercase font-bold">At Risk</span>
+</div>
+<span class="font-mono text-[11px] text-rose-600 font-medium">SLA buffer &lt; 2h</span>
+</div>
+<div class="w-10 h-10 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-600">
+<span class="material-symbols-outlined text-[20px]">notification_important</span>
+</div>
+</div>
+</div>
+<!-- Main Charts Section -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<!-- Lifecycle Bar Chart (2 cols) -->
+<div class="lg:col-span-2 p-6 bg-white border border-slate-200 rounded-xl shadow-sm flex flex-col gap-4">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+<div class="flex flex-col">
+<h2 class="text-base font-semibold text-slate-900">Case Lifecycle Analysis (IST)</h2>
+<p class="text-xs text-slate-500">Hours elapsed for open cases vs. final resolution time across recent intake batch.</p>
+</div>
+<!-- Restrained Muted Legend -->
+<div class="flex items-center gap-3">
+<div class="flex items-center gap-1.5 font-mono text-[11px] text-slate-500">
+<span class="w-2.5 h-2.5 rounded-sm bg-slate-700"></span>
+<span>&lt; 24h</span>
+</div>
+<div class="flex items-center gap-1.5 font-mono text-[11px] text-slate-500">
+<span class="w-2.5 h-2.5 rounded-sm bg-amber-400"></span>
+<span>24h – 48h</span>
+</div>
+<div class="flex items-center gap-1.5 font-mono text-[11px] text-slate-500">
+<span class="w-2.5 h-2.5 rounded-sm bg-rose-500"></span>
+<span>&gt; 48h</span>
+</div>
+</div>
+</div>
+<!-- Harmonious SVG / CSS Bar Chart -->
+<div class="relative w-full h-72 flex flex-col justify-end pt-4 pb-2">
+<!-- Y-Axis Guideline Lines -->
+<div class="absolute inset-x-0 top-4 bottom-8 flex flex-col justify-between pointer-events-none">
+<div class="w-full flex items-center justify-between text-slate-400 font-mono text-[11px]">
+<span>72h</span><div class="w-full ml-3 h-px bg-slate-100"></div>
+</div>
+<div class="w-full flex items-center justify-between text-slate-400 font-mono text-[11px]">
+<span>48h</span><div class="w-full ml-3 h-px bg-slate-100"></div>
+</div>
+<div class="w-full flex items-center justify-between text-slate-400 font-mono text-[11px]">
+<span>24h</span><div class="w-full ml-3 h-px bg-slate-100"></div>
+</div>
+<div class="w-full flex items-center justify-between text-slate-400 font-mono text-[11px]">
+<span>0h</span><div class="w-full ml-3 h-px bg-slate-100"></div>
+</div>
+</div>
+<!-- Bar Stack -->
+<div class="relative z-10 w-full h-56 flex items-end justify-between gap-2 px-6">
+<!-- Case 1: #1042 - 14h (<24h: slate-700) -->
+<div class="group relative flex-1 flex flex-col items-center h-full justify-end cursor-pointer">
+<div class="w-full max-w-[28px] rounded-t-sm bg-slate-700 transition-all group-hover:bg-slate-900" style="height: 19%;"></div>
+<div class="absolute -top-8 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-slate-900 text-white px-2 py-1 rounded shadow-md font-mono text-[10px] whitespace-nowrap z-20">
+                    #1042: 14h (Resolved)
+                  </div>
+<span class="mt-2 font-mono text-[11px] text-slate-500 truncate w-full text-center">#1042</span>
+</div>
+<!-- Case 2: #1043 - 38h (24-48h: amber-400) -->
+<div class="group relative flex-1 flex flex-col items-center h-full justify-end cursor-pointer">
+<div class="w-full max-w-[28px] rounded-t-sm bg-amber-400 transition-all group-hover:bg-amber-500" style="height: 52%;"></div>
+<div class="absolute -top-8 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-slate-900 text-white px-2 py-1 rounded shadow-md font-mono text-[10px] whitespace-nowrap z-20">
+                    #1043: 38h (In Progress)
+                  </div>
+<span class="mt-2 font-mono text-[11px] text-slate-500 truncate w-full text-center">#1043</span>
+</div>
+<!-- Case 3: #1044 - 18h (<24h: slate-700) -->
+<div class="group relative flex-1 flex flex-col items-center h-full justify-end cursor-pointer">
+<div class="w-full max-w-[28px] rounded-t-sm bg-slate-700 transition-all group-hover:bg-slate-900" style="height: 25%;"></div>
+<div class="absolute -top-8 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-slate-900 text-white px-2 py-1 rounded shadow-md font-mono text-[10px] whitespace-nowrap z-20">
+                    #1044: 18h (Resolved)
+                  </div>
+<span class="mt-2 font-mono text-[11px] text-slate-500 truncate w-full text-center">#1044</span>
+</div>
+<!-- Case 4: #1045 - 56h (>48h: rose-500) -->
+<div class="group relative flex-1 flex flex-col items-center h-full justify-end cursor-pointer">
+<div class="w-full max-w-[28px] rounded-t-sm bg-rose-500 transition-all group-hover:bg-rose-600" style="height: 77%;"></div>
+<div class="absolute -top-8 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-slate-900 text-white px-2 py-1 rounded shadow-md font-mono text-[10px] whitespace-nowrap z-20">
+                    #1045: 56h (Breached)
+                  </div>
+<span class="mt-2 font-mono text-[11px] text-slate-500 truncate w-full text-center">#1045</span>
+</div>
+<!-- Case 5: #1046 - 8h -->
+<div class="group relative flex-1 flex flex-col items-center h-full justify-end cursor-pointer">
+<div class="w-full max-w-[28px] rounded-t-sm bg-slate-700 transition-all group-hover:bg-slate-900" style="height: 12%;"></div>
+<div class="absolute -top-8 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-slate-900 text-white px-2 py-1 rounded shadow-md font-mono text-[10px] whitespace-nowrap z-20">
+                    #1046: 8h (Resolved)
+                  </div>
+<span class="mt-2 font-mono text-[11px] text-slate-500 truncate w-full text-center">#1046</span>
+</div>
+<!-- Case 6: #1047 - 28h -->
+<div class="group relative flex-1 flex flex-col items-center h-full justify-end cursor-pointer">
+<div class="w-full max-w-[28px] rounded-t-sm bg-amber-400 transition-all group-hover:bg-amber-500" style="height: 38%;"></div>
+<div class="absolute -top-8 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-slate-900 text-white px-2 py-1 rounded shadow-md font-mono text-[10px] whitespace-nowrap z-20">
+                    #1047: 28h (In Progress)
+                  </div>
+<span class="mt-2 font-mono text-[11px] text-slate-500 truncate w-full text-center">#1047</span>
+</div>
+<!-- Case 7: #1048 - 62h Breached -->
+<div class="group relative flex-1 flex flex-col items-center h-full justify-end cursor-pointer">
+<div class="w-full max-w-[28px] rounded-t-sm bg-rose-500 transition-all group-hover:bg-rose-600" style="height: 86%;"></div>
+<div class="absolute -top-8 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-slate-900 text-white px-2 py-1 rounded shadow-md font-mono text-[10px] whitespace-nowrap z-20">
+                    #1048: 62h (Breached)
+                  </div>
+<span class="mt-2 font-mono text-[11px] text-slate-500 truncate w-full text-center">#1048</span>
+</div>
+<!-- Case 8: #1049 - 16h -->
+<div class="group relative flex-1 flex flex-col items-center h-full justify-end cursor-pointer">
+<div class="w-full max-w-[28px] rounded-t-sm bg-slate-700 transition-all group-hover:bg-slate-900" style="height: 22%;"></div>
+<div class="absolute -top-8 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-slate-900 text-white px-2 py-1 rounded shadow-md font-mono text-[10px] whitespace-nowrap z-20">
+                    #1049: 16h (Resolved)
+                  </div>
+<span class="mt-2 font-mono text-[11px] text-slate-500 truncate w-full text-center">#1049</span>
+</div>
+<!-- Case 9: #1050 - 32h -->
+<div class="group relative flex-1 flex flex-col items-center h-full justify-end cursor-pointer">
+<div class="w-full max-w-[28px] rounded-t-sm bg-amber-400 transition-all group-hover:bg-amber-500" style="height: 44%;"></div>
+<div class="absolute -top-8 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-slate-900 text-white px-2 py-1 rounded shadow-md font-mono text-[10px] whitespace-nowrap z-20">
+                    #1050: 32h (Escalated)
+                  </div>
+<span class="mt-2 font-mono text-[11px] text-slate-500 truncate w-full text-center">#1050</span>
+</div>
+<!-- Case 10: #1051 - 9h -->
+<div class="group relative flex-1 flex flex-col items-center h-full justify-end cursor-pointer">
+<div class="w-full max-w-[28px] rounded-t-sm bg-slate-700 transition-all group-hover:bg-slate-900" style="height: 13%;"></div>
+<div class="absolute -top-8 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-slate-900 text-white px-2 py-1 rounded shadow-md font-mono text-[10px] whitespace-nowrap z-20">
+                    #1051: 9h (Resolved)
+                  </div>
+<span class="mt-2 font-mono text-[11px] text-slate-500 truncate w-full text-center">#1051</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Category Distribution (1 col) -->
+<div class="p-6 bg-white border border-slate-200 rounded-xl shadow-sm flex flex-col justify-between gap-4">
+<div class="flex flex-col pb-3 border-b border-slate-100">
+<h2 class="text-base font-semibold text-slate-900">Category Distribution</h2>
+<p class="text-xs text-slate-500">Proportion by complaint classification</p>
+</div>
+<!-- Donut Chart -->
+<div class="flex flex-col items-center justify-center my-auto py-2">
+<div class="relative w-40 h-40 flex items-center justify-center">
+<svg class="w-full h-full -rotate-90" viewbox="0 0 100 100">
+<!-- Background track -->
+<circle cx="50" cy="50" fill="transparent" r="38" stroke="#f1f5f9" stroke-width="11"></circle>
+<!-- Product: 54% (dash 128.9) - slate-900 -->
+<circle cx="50" cy="50" fill="transparent" r="38" stroke="#0f172a" stroke-dasharray="128.9 238.76" stroke-dashoffset="0" stroke-width="11"></circle>
+<!-- Packaging: 28% (dash 66.8) - slate-500 -->
+<circle cx="50" cy="50" fill="transparent" r="38" stroke="#64748b" stroke-dasharray="66.8 238.76" stroke-dashoffset="-128.9" stroke-width="11"></circle>
+<!-- Trade: 18% (dash 43) - slate-300 -->
+<circle cx="50" cy="50" fill="transparent" r="38" stroke="#cbd5e1" stroke-dasharray="43 238.76" stroke-dashoffset="-195.7" stroke-width="11"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center text-center">
+<span class="text-2xl font-bold text-slate-900 font-mono leading-none">142</span>
+<span class="font-mono text-[10px] text-slate-400 uppercase tracking-wider font-semibold mt-1">Total Intake</span>
+</div>
+</div>
+</div>
+<!-- Harmonious breakdown labels -->
+<div class="flex flex-col gap-2 pt-2">
+<div class="flex items-center justify-between p-2 rounded-lg bg-slate-50 text-xs">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-slate-900"></span>
+<span class="text-slate-800 font-medium">Product Faults</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-mono text-slate-400">77 cases</span>
+<span class="font-mono font-semibold text-slate-800">54%</span>
+</div>
+</div>
+<div class="flex items-center justify-between p-2 rounded-lg bg-slate-50 text-xs">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-slate-500"></span>
+<span class="text-slate-800 font-medium">Packaging Defect</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-mono text-slate-400">40 cases</span>
+<span class="font-mono font-semibold text-slate-800">28%</span>
+</div>
+</div>
+<div class="flex items-center justify-between p-2 rounded-lg bg-slate-50 text-xs">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-slate-300"></span>
+<span class="text-slate-800 font-medium">Trade &amp; Logistics</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-mono text-slate-400">25 cases</span>
+<span class="font-mono font-semibold text-slate-800">18%</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Priority & Recent Incidents Section -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<!-- Priority Distribution (1 col) -->
+<div class="p-6 bg-white border border-slate-200 rounded-xl shadow-sm flex flex-col justify-between gap-5">
+<div class="flex flex-col pb-3 border-b border-slate-100">
+<h2 class="text-base font-semibold text-slate-900">Priority Distribution</h2>
+<p class="text-xs text-slate-500">Severity allocation for active queues</p>
+</div>
+<div class="flex flex-col gap-4 my-auto">
+<!-- High Severity -->
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center justify-between text-xs">
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-rose-500"></span>
+<span class="font-medium text-slate-700">High Severity</span>
+</div>
+<span class="font-mono text-rose-600 font-medium">28 cases (20%)</span>
+</div>
+<div class="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
+<div class="h-full bg-rose-500 rounded-full" style="width: 20%;"></div>
+</div>
+</div>
+<!-- Medium Severity -->
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center justify-between text-xs">
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-amber-400"></span>
+<span class="font-medium text-slate-700">Medium Severity</span>
+</div>
+<span class="font-mono text-amber-600 font-medium">64 cases (45%)</span>
+</div>
+<div class="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
+<div class="h-full bg-amber-400 rounded-full" style="width: 45%;"></div>
+</div>
+</div>
+<!-- Low Severity -->
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center justify-between text-xs">
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-slate-400"></span>
+<span class="font-medium text-slate-700">Low Severity</span>
+</div>
+<span class="font-mono text-slate-600 font-medium">50 cases (35%)</span>
+</div>
+<div class="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
+<div class="h-full bg-slate-400 rounded-full" style="width: 35%;"></div>
+</div>
+</div>
+</div>
+<!-- Target Compliance Card -->
+<div class="p-3 bg-slate-50 border border-slate-200/60 rounded-lg flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-emerald-600">verified_user</span>
+<span class="text-xs text-slate-600 font-medium">Target SLA compliance</span>
+</div>
+<span class="font-mono text-xs font-bold text-slate-900">96.4%</span>
+</div>
+</div>
+<!-- Recent Critical Incidents Table (2 cols) -->
+<div class="lg:col-span-2 p-6 bg-white border border-slate-200 rounded-xl shadow-sm flex flex-col gap-4">
+<div class="flex items-center justify-between pb-3 border-b border-slate-100">
+<div class="flex flex-col">
+<h2 class="text-base font-semibold text-slate-900">Recent Critical Incidents</h2>
+<p class="text-xs text-slate-500">Actionable triage queue requiring immediate operational sign-off</p>
+</div>
+<a class="flex items-center gap-1 text-xs font-semibold text-slate-700 hover:text-slate-900 transition-colors" href="#">
+<span>View All 19</span>
+<span class="material-symbols-outlined text-[15px]">arrow_forward</span>
+</a>
+</div>
+<!-- Incidents Data Table -->
+<div class="overflow-x-auto w-full">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b border-slate-100 text-slate-400 font-mono text-[11px] uppercase tracking-wider">
+<th class="py-2.5 px-3 font-medium">ID &amp; Customer</th>
+<th class="py-2.5 px-3 font-medium">Channel</th>
+<th class="py-2.5 px-3 font-medium">Urgency</th>
+<th class="py-2.5 px-3 font-medium">Sentiment</th>
+<th class="py-2.5 px-3 font-medium">Hours Open</th>
+<th class="py-2.5 px-3 font-medium text-right">Quick Action</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100 text-xs text-slate-900">
+<!-- Row 1 -->
+<tr class="hover:bg-slate-50/70 transition-colors">
+<td class="py-3 px-3">
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 font-mono text-[11px] font-medium">#CAS-10492</span>
+<span class="font-semibold text-slate-900">Apex Logistics</span>
+</div>
+<span class="text-[11px] text-slate-500 mt-0.5">Damaged bulk packaging batch #B-9102</span>
+</div>
+</td>
+<td class="py-3 px-3">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-mono text-[11px]">
+<span class="material-symbols-outlined text-[13px] text-slate-500">mail</span> Email
+                      </span>
+</td>
+<td class="py-3 px-3">
+<span class="px-2 py-0.5 rounded bg-rose-50 text-rose-700 font-mono text-[10px] uppercase font-bold">High</span>
+</td>
+<td class="py-3 px-3">
+<div class="flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+<span class="font-mono text-[11px] text-rose-700 font-medium">0.12 (Severe)</span>
+</div>
+</td>
+<td class="py-3 px-3 font-mono text-xs font-semibold text-rose-700">
+                      56.2h
+                    </td>
+<td class="py-3 px-3 text-right">
+<div class="flex items-center justify-end gap-1.5">
+<button class="px-2.5 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium text-xs transition-colors">
+                          Re-Review
+                        </button>
+<button class="px-2.5 py-1 rounded bg-slate-900 text-white font-medium text-xs hover:bg-slate-800 transition-colors">
+                          Assign
+                        </button>
+</div>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-slate-50/70 transition-colors">
+<td class="py-3 px-3">
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 font-mono text-[11px] font-medium">#CAS-10490</span>
+<span class="font-semibold text-slate-900">Pharmex Health</span>
+</div>
+<span class="text-[11px] text-slate-500 mt-0.5">Seal compromise alert in thermo-cooler</span>
+</div>
+</td>
+<td class="py-3 px-3">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-mono text-[11px]">
+<span class="material-symbols-outlined text-[13px] text-slate-500">mic</span> Audio Log
+                      </span>
+</td>
+<td class="py-3 px-3">
+<span class="px-2 py-0.5 rounded bg-rose-50 text-rose-700 font-mono text-[10px] uppercase font-bold">High</span>
+</td>
+<td class="py-3 px-3">
+<div class="flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+<span class="font-mono text-[11px] text-rose-700 font-medium">0.18 (Angry)</span>
+</div>
+</td>
+<td class="py-3 px-3 font-mono text-xs font-semibold text-amber-600">
+                      34.8h
+                    </td>
+<td class="py-3 px-3 text-right">
+<div class="flex items-center justify-end gap-1.5">
+<button class="px-2.5 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium text-xs transition-colors">
+                          Re-Review
+                        </button>
+<button class="px-2.5 py-1 rounded bg-slate-900 text-white font-medium text-xs hover:bg-slate-800 transition-colors">
+                          Assign
+                        </button>
+</div>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-slate-50/70 transition-colors">
+<td class="py-3 px-3">
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 font-mono text-[11px] font-medium">#CAS-10488</span>
+<span class="font-semibold text-slate-900">Zenith Retailers</span>
+</div>
+<span class="text-[11px] text-slate-500 mt-0.5">Late EDI acknowledgment for manifest #M-3001</span>
+</div>
+</td>
+<td class="py-3 px-3">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-mono text-[11px]">
+<span class="material-symbols-outlined text-[13px] text-slate-500">phone_in_talk</span> Phone
+                      </span>
+</td>
+<td class="py-3 px-3">
+<span class="px-2 py-0.5 rounded bg-amber-50 text-amber-700 font-mono text-[10px] uppercase font-bold">Medium</span>
+</td>
+<td class="py-3 px-3">
+<div class="flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+<span class="font-mono text-[11px] text-slate-600 font-medium">0.45 (Neutral)</span>
+</div>
+</td>
+<td class="py-3 px-3 font-mono text-xs font-semibold text-slate-700">
+                      12.1h
+                    </td>
+<td class="py-3 px-3 text-right">
+<div class="flex items-center justify-end gap-1.5">
+<button class="px-2.5 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium text-xs transition-colors">
+                          Re-Review
+                        </button>
+<button class="px-2.5 py-1 rounded bg-slate-900 text-white font-medium text-xs hover:bg-slate-800 transition-colors">
+                          Assign
+                        </button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+<!-- Sync feedback -->
+<script>
+        document.getElementById('refreshBtn')?.addEventListener('click', function() {
+          const icon = document.getElementById('refreshIcon');
+          if (icon) {
+            icon.classList.add('rotate-180');
+            setTimeout(() => {
+              icon.classList.remove('rotate-180');
+            }, 500);
+          }
+        });
+      </script>
+</main>
+</div>
+</body></html>

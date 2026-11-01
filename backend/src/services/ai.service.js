@@ -92,7 +92,7 @@ async function analyzeComplaint(complaintData) {
             if (errorJson && errorJson.detail) {
                 errorMessage = typeof errorJson.detail === "string"
                     ? errorJson.detail
-                    : "Invalid request payload sent to AI service";
+                    : "Invalid payload: " + JSON.stringify(errorJson.detail);
             }
         } catch (_) {
             // Keep default errorMessage

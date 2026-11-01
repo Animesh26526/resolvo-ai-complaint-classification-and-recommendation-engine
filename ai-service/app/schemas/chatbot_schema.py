@@ -15,7 +15,7 @@ class ChatRequest(BaseModel):
         ..., 
         min_length=1, 
         description="User's query or conversational statement",
-        example="My product arrived damaged. What should I do?"
+        examples=["My product arrived damaged. What should I do?"]
     )
     history: Optional[List[ChatMessage]] = Field(
         default_factory=list,

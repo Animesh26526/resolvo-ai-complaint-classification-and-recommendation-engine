@@ -105,12 +105,13 @@ class GeminiAudioService:
 
         for model_name in models_to_try:
             for api_key in self.api_keys:
+                contents = [
+                    types.Part.from_bytes(data=audio_bytes, mime_type=mime_type),
+                    prompt_instruction,
+                ]
+                client = None
                 try:
                     client = genai.Client(api_key=api_key)
-                    contents = [
-                        types.Part.from_bytes(data=audio_bytes, mime_type=mime_type),
-                        prompt_instruction,
-                    ]
                     response = client.models.generate_content(
                         model=model_name,
                         contents=contents,
@@ -126,7 +127,7 @@ class GeminiAudioService:
                     last_error = exc
                     if "invalid_argument" in err_str or "invalid argument" in err_str:
                         raise ValueError(f"Uploaded audio is corrupted or invalid format: {exc}")
-                    if "503" in err_str or "unavailable" in err_str:
+                    if ("503" in err_str or "unavailable" in err_str) and client is not None:
                         await asyncio.sleep(1.0)
                         try:
                             retry_resp = client.models.generate_content(
